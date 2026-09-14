@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>树獭这么懒，它是怎么活下来的？— 费曼教室</title>
+<meta name="description" content="一个孩子的问题，一个 3500 万年才写出的答案。用最少的能量活最久的动物，费曼式讲给你听。每个数字都标了论文来源。">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b2a1f'/%3E%3Cpath d='M4 11C10 8 22 14 28 10' stroke='%236b563c' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='20' r='7' fill='%23c9a227'/%3E%3C/svg%3E">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   树獭费曼页 · 重建版 v1.0（2026-09-14）
+   设计血缘：light-feynman / transformer-feynman（同「费曼系列」）
+   零第三方资源：不加载任何外部字体 / 脚本 / 图片；
+   树獭主图是纯 SVG 画的。
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  /* 底色取雨林树冠下的幽暗，强调色沿用系列的金，副色取自树獭自己的世界 */
+  --bg:#0a100e;
+  --bg2:#0e1714;
+  --card:#121d19;
+  --card2:#16241f;
+  --border:#1f2e28;
+  --text:#e4e8e4;
+  --text2:#8fa39a;
+  --dim:#5f7269;
+  --gold:#e8c26a;      /* 主强调，系列同源 */
+  --leaf:#7fb069;      /* 叶子 / 藻类 */
+  --moss:#4e7a5a;      /* 苔藓 / 毛发上的绿 */
+  --clay:#c88a5e;      /* 树獭毛色 */
+  --cyan:#6fb3c8;      /* 水 */
+  --red:#e07a6a;       /* 威胁 / 警示 */
+  --radius:14px;
+  --content:900px;
+  --gutter:clamp(1rem,4vw,2rem);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif;
+  --mono:ui-monospace,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(127,176,105,.10), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 85% 45%, rgba(232,194,106,.05), transparent 70%),
+    linear-gradient(180deg,#080d0b 0%, var(--bg) 40%, #070b09 100%);
+  color:var(--text);
+  font-family:var(--font);
+  line-height:1.85;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+p,h1,h2,h3,h4,li,td,th,a,span{overflow-wrap:anywhere}
+img,svg{max-width:100%}
+
+/* ── 背景漂浮粒子（动效 1） ── */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;border-radius:50%;opacity:0;animation:float-up linear infinite}
+.particle.leaf{background:var(--leaf);box-shadow:0 0 8px rgba(127,176,105,.7)}
+.particle.gold{background:var(--gold);box-shadow:0 0 8px rgba(232,194,106,.7)}
+.particle.cyan{background:var(--cyan);box-shadow:0 0 7px rgba(111,179,200,.6)}
+@keyframes float-up{
+  0%{transform:translateY(102vh) translateX(0) scale(.2);opacity:0}
+  12%{opacity:.55}
+  50%{transform:translateY(48vh) translateX(26px) scale(1);opacity:.3}
+  88%{opacity:.06}
+  100%{transform:translateY(-8vh) translateX(-18px) scale(.15);opacity:0}
+}
+
+/* ── 顶栏 ── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  height:54px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:0 14px;
+  background:rgba(10,16,14,.9);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-size:14px;font-weight:700;color:var(--gold);white-space:nowrap;letter-spacing:.3px}
+.logo span{color:var(--text2);font-weight:400}
+nav{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:100%}
+nav::-webkit-scrollbar{display:none}
+nav a{
+  display:block;padding:5px 9px;font-size:12px;color:var(--text2);text-decoration:none;
+  border-radius:6px;white-space:nowrap;transition:background .2s,color .2s;
+}
+nav a:hover,nav a:focus-visible,nav a.active{background:var(--card);color:var(--gold)}
+
+/* ── Hero ── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:84px var(--gutter) 56px;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 55% 45% at 50% 32%, rgba(127,176,105,.10), transparent 70%);
+  animation:breathe-glow 9s ease-in-out infinite;
+}
+@keyframes breathe-glow{0%,100%{opacity:.55}50%{opacity:1}}
+
+.sloth-stage{width:min(340px,74vw);margin:0 auto .5rem}
+.sloth-svg{width:100%;height:auto;display:block;transform-origin:50% 6%;animation:sway 6.5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+
+.hero h1{
+  font-size:clamp(1.7rem,6.2vw,3.2rem);
+  font-weight:800;line-height:1.28;letter-spacing:.5px;margin-bottom:14px;
+  background:linear-gradient(100deg,var(--gold) 0%,#ffd98a 22%,var(--leaf) 46%,var(--gold) 68%,var(--clay) 100%);
+  background-size:280% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shimmer 11s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:280% 50%}}
+.hero .sub{font-size:clamp(.96rem,2.6vw,1.2rem);color:var(--text2);max-width:34rem;margin:0 auto 26px;line-height:1.75}
+.hero .cta{
+  display:inline-block;padding:12px 26px;border-radius:10px;font-weight:700;font-size:.95rem;
+  background:var(--gold);color:#0a100e;text-decoration:none;
+  transition:transform .25s,box-shadow .25s;
+}
+.hero .cta:hover,.hero .cta:focus-visible{transform:translateY(-2px);box-shadow:0 6px 24px rgba(232,194,106,.28)}
+.hero .meta{font-size:.78rem;color:var(--dim);margin-top:22px;line-height:1.9}
+.rebuild{
+  display:inline-block;margin-bottom:14px;padding:3px 12px;border-radius:999px;
+  font-size:.68rem;letter-spacing:1.5px;color:var(--gold);
+  border:1px dashed rgba(232,194,106,.45);background:rgba(232,194,106,.06);
+}
+
+/* ── 章节 ── */
+main{position:relative;z-index:1}
+.chapter{
+  max-width:var(--content);margin:0 auto;padding:clamp(44px,7vw,72px) var(--gutter);
+  border-bottom:1px solid rgba(31,46,40,.75);
+  opacity:0;transform:translateY(22px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.chapter.revealed{opacity:1;transform:none}
+.chapter:last-of-type{border-bottom:none}
+.chapter-num{
+  font-size:.7rem;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;
+}
+.chapter h2{font-size:clamp(1.35rem,4.2vw,2rem);font-weight:800;line-height:1.35;margin-bottom:8px}
+.chapter .lede{font-size:clamp(.95rem,2.4vw,1.05rem);color:var(--text2);margin-bottom:22px}
+.chapter p{font-size:clamp(.92rem,2.3vw,1rem);color:#c9d2cc;margin-bottom:14px}
+.chapter p strong{color:var(--text)}
+.chapter h3{font-size:1.05rem;font-weight:700;margin:22px 0 8px;color:var(--gold)}
+
+/* ── 费曼类比框 ── */
+.analogy{
+  padding:16px 18px;border-radius:var(--radius);margin:18px 0;
+  background:linear-gradient(135deg,rgba(127,176,105,.09),rgba(232,194,106,.05));
+  border:1px solid rgba(127,176,105,.22);
+}
+.analogy .label{font-size:.72rem;font-weight:700;letter-spacing:1.4px;color:var(--leaf);margin-bottom:6px;text-transform:uppercase}
+.analogy p{margin-bottom:8px;color:#c4cfc8}
+.analogy p:last-child{margin-bottom:0}
+
+/* ── 数据卡片（动效 4：hover 上浮发光） ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:22px 0}
+/* 4 张卡的区块改成 2×2：避免 3 列网格留下「3+1」的大片空白 */
+.cards.c4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){
+  .cards,.cards.c4{grid-template-columns:1fr}
+}
+.card{
+  position:relative;padding:18px 18px 16px;border-radius:var(--radius);
+  background:linear-gradient(160deg,var(--card2),var(--card));
+  border:1px solid var(--border);
+  transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;
+}
+.card:hover,.card:focus-within{
+  transform:translateY(-5px);
+  border-color:rgba(232,194,106,.5);
+  box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 26px rgba(232,194,106,.10);
+}
+.card .val{
+  font-size:clamp(1.6rem,5vw,2.1rem);font-weight:800;line-height:1.1;letter-spacing:.5px;
+  color:var(--gold);font-variant-numeric:tabular-nums;
+}
+.card .val small{font-size:.85rem;font-weight:600;color:var(--text2);margin-left:3px}
+.card .lab{font-size:.95rem;font-weight:700;margin:7px 0 5px;color:var(--text)}
+.card .desc{font-size:.82rem;color:var(--text2);line-height:1.7}
+.card .src{
+  display:block;margin-top:11px;padding-top:9px;border-top:1px solid rgba(31,46,40,.9);
+  font-size:.68rem;color:var(--dim);line-height:1.6;
+}
+.card .src a{color:var(--dim);text-decoration:none;border-bottom:1px dotted rgba(95,114,105,.7)}
+.card .src a:hover{color:var(--leaf)}
+.card.leaf .val{color:var(--leaf)}
+.card.cyan .val{color:var(--cyan)}
+.card.clay .val{color:var(--clay)}
+
+/* ── 图标行（SVG 手绘小图） ── */
+.card .glyph{width:30px;height:30px;color:var(--leaf);margin-bottom:8px;opacity:.9}
+
+/* ── 柱状图（动效 2：滚动到可见时生长） ── */
+.chart{margin:24px 0 8px}
+.chart-row{margin-bottom:16px}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:.85rem;margin-bottom:5px}
+.chart-head .name{color:var(--text);font-weight:600}
+.chart-head .pct{color:var(--gold);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chart-track{
+  position:relative;height:16px;border-radius:9px;overflow:hidden;
+  background:rgba(255,255,255,.045);border:1px solid rgba(31,46,40,.9);
+}
+.chart-fill{
+  height:100%;width:0;border-radius:9px;
+  transition:width 1.4s cubic-bezier(.22,.9,.24,1);
+}
+.chart-fill.g1{background:linear-gradient(90deg,#5f8f4e,var(--leaf))}
+.chart-fill.g2{background:linear-gradient(90deg,#7a6a44,var(--gold))}
+.chart-fill.g3{background:linear-gradient(90deg,#3f6a78,var(--cyan))}
+.chart-fill.g4{background:linear-gradient(90deg,#8a6250,var(--clay))}
+.chart-note{font-size:.72rem;color:var(--dim);line-height:1.7;margin-top:6px}
+.chart-note a{color:var(--dim);border-bottom:1px dotted rgba(95,114,105,.7);text-decoration:none}
+.chart-note a:hover{color:var(--leaf)}
+
+/* ── 时间线（动效 5：节点脉冲） ── */
+.timeline{position:relative;margin:26px 0 8px;padding-left:26px;border-left:2px solid rgba(31,46,40,.95)}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{
+  content:'';position:absolute;left:-33px;top:7px;width:11px;height:11px;border-radius:50%;
+  background:var(--gold);border:2px solid #0a100e;
+  animation:node-pulse 3.2s ease-in-out infinite;
+}
+.tl-item:nth-child(2n)::before{background:var(--leaf);animation-delay:.5s}
+.tl-item:nth-child(3n)::before{background:var(--cyan);animation-delay:1s}
+.tl-item:nth-child(3n+1)::before{animation-delay:1.5s}
+@keyframes node-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(232,194,106,.5)}
+  55%{box-shadow:0 0 0 9px rgba(232,194,106,0)}
+}
+.tl-item .when{font-size:.74rem;font-weight:800;letter-spacing:1.2px;color:var(--gold);font-variant-numeric:tabular-nums}
+.tl-item h4{font-size:.98rem;font-weight:700;margin:2px 0 4px}
+.tl-item p{font-size:.85rem;color:var(--text2);margin:0}
+.tl-item .src{font-size:.68rem;color:var(--dim);display:block;margin-top:4px;line-height:1.65}
+.tl-item .src a{color:var(--dim);border-bottom:1px dotted rgba(95,114,105,.7);text-decoration:none}
+.tl-item .src a:hover{color:var(--leaf)}
+
+/* ── 测验（动效 6：答对答错反馈） ── */
+.quiz{margin:20px 0}
+.quiz-q{
+  padding:16px 17px;border-radius:var(--radius);margin-bottom:14px;
+  background:var(--card);border:1px solid var(--border);
+}
+.quiz-q .q-text{font-size:.95rem;font-weight:700;margin-bottom:11px;color:var(--text)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  padding:11px 14px;border-radius:9px;font-size:.88rem;font-family:inherit;color:#c9d2cc;
+  background:rgba(255,255,255,.028);border:1px solid var(--border);
+  transition:background .2s,border-color .2s,transform .2s;
+}
+.opt:hover:not(.locked),.opt:focus-visible:not(.locked){background:rgba(232,194,106,.08);border-color:rgba(232,194,106,.4);transform:translateX(3px)}
+.opt.locked{cursor:default}
+.opt.right{background:rgba(127,176,105,.16);border-color:var(--leaf);color:#dff0d6}
+.opt.wrong{background:rgba(224,122,106,.15);border-color:var(--red);color:#f6d9d3;animation:shake .42s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.opt .mk{font-weight:800;margin-right:6px}
+.fb{
+  display:none;margin-top:11px;padding:11px 13px;border-radius:9px;
+  font-size:.84rem;line-height:1.75;border-left:3px solid var(--gold);
+  background:rgba(232,194,106,.07);color:#d5ded7;
+}
+.fb.show{display:block;animation:fb-in .35s ease}
+.fb.ok{border-left-color:var(--leaf);background:rgba(127,176,105,.09)}
+.fb.no{border-left-color:var(--red);background:rgba(224,122,106,.08)}
+@keyframes fb-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ── 末页引言（动效 7：呼吸式发光） ── */
+.finale{
+  position:relative;z-index:1;max-width:var(--content);margin:0 auto;
+  padding:clamp(56px,10vw,96px) var(--gutter);
+  text-align:center;
+}
+.quote-card{
+  padding:clamp(26px,6vw,44px) clamp(20px,5vw,40px);border-radius:20px;
+  border:1px solid rgba(232,194,106,.28);
+  background:linear-gradient(160deg,rgba(18,29,25,.95),rgba(14,23,20,.98));
+  animation:quote-breathe 7s ease-in-out infinite;
+}
+@keyframes quote-breathe{
+  0%,100%{box-shadow:0 0 0 0 rgba(232,194,106,.0),0 0 34px rgba(232,194,106,.06)}
+  50%{box-shadow:0 0 44px rgba(232,194,106,.16),0 0 96px rgba(127,176,105,.08)}
+}
+.quote-card .q{
+  font-size:clamp(1.08rem,3.4vw,1.5rem);font-weight:700;line-height:1.75;
+  color:var(--gold);margin-bottom:14px;
+}
+.quote-card .q2{font-size:clamp(.9rem,2.5vw,1rem);color:#c2ccc5;line-height:1.9;margin-bottom:16px}
+.quote-card .by{font-size:.76rem;color:var(--dim);line-height:1.8}
+
+/* ── 页脚 / 来源清单 ── */
+footer{
+  position:relative;z-index:1;border-top:1px solid var(--border);
+  background:rgba(8,13,11,.7);padding:clamp(34px,6vw,54px) var(--gutter);
+}
+.foot-in{max-width:var(--content);margin:0 auto}
+.foot-in h3{font-size:.82rem;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.srclist{list-style:none;display:grid;gap:9px;margin-bottom:22px}
+.srclist li{font-size:.78rem;color:var(--text2);line-height:1.75;padding-left:14px;position:relative}
+.srclist li::before{content:'·';position:absolute;left:2px;color:var(--leaf);font-weight:800}
+.srclist a{color:#a9bdb2;text-decoration:none;border-bottom:1px dotted rgba(95,114,105,.8);word-break:break-all}
+.srclist a:hover{color:var(--gold)}
+.honest{
+  font-size:.76rem;color:var(--dim);line-height:1.85;padding:14px 16px;border-radius:var(--radius);
+  border:1px dashed rgba(31,46,40,1);background:rgba(255,255,255,.015);
+}
+.honest strong{color:var(--text2)}
+
+/* ── 窄屏微调 ── */
+@media (max-width:480px){
+  .cards{grid-template-columns:1fr}
+  .logo span{display:none}
+  .chapter{padding-left:max(var(--gutter),18px);padding-right:max(var(--gutter),18px)}
+  .timeline{padding-left:20px}
+  .tl-item::before{left:-27px}
+}
+
+/* ── 无动画偏好：关掉全部动效（P0） ── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+  .chapter{opacity:1;transform:none}
+  .particles{display:none}
+  .chart-fill{width:var(--w,0)!important}
+}
+body.reduced .particles{display:none}
+body.reduced .chapter{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles" aria-hidden="true"></div>
+
+<header>
+  <div class="logo">树獭<span> · 费曼教室</span></div>
+  <nav aria-label="章节导航">
+    <a href="#intuition">直觉</a>
+    <a href="#numbers">数字</a>
+    <a href="#chart">对比</a>
+    <a href="#fur">毛</a>
+    <a href="#water">水</a>
+    <a href="#gut">消化</a>
+    <a href="#history">历史</a>
+    <a href="#enemies">天敌</a>
+    <a href="#threats">今天</a>
+    <a href="#quiz">测验</a>
+  </nav>
+</header>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="top">
+  <div class="sloth-stage">
+    <!-- 纯 SVG 手绘树獭：倒挂在树枝上。不用 emoji，跨平台渲染一致 -->
+    <svg class="sloth-svg" viewBox="0 0 320 260" role="img" aria-label="一只树獭倒挂在树枝上">
+      <title>一只挂在树枝上的三趾树獭</title>
+      <!-- 树枝 -->
+      <path d="M6 40 C 70 26, 150 52, 314 34" stroke="#6b563c" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <path d="M6 40 C 70 26, 150 52, 314 34" stroke="#846a4a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- 叶子 -->
+      <g opacity=".92">
+        <path d="M40 30 q14 -20 30 -6 q-14 20 -30 6z" fill="#4e7a5a"/>
+        <path d="M238 26 q16 -22 34 -6 q-16 22 -34 6z" fill="#5d8f66"/>
+        <path d="M268 52 q13 -18 28 -5 q-13 18 -28 5z" fill="#42694c"/>
+      </g>
+      <!-- 前臂（抓枝） -->
+      <path d="M112 44 C 106 78, 108 96, 118 118" stroke="#8a6a4a" stroke-width="17" fill="none" stroke-linecap="round"/>
+      <path d="M196 42 C 204 76, 202 96, 192 118" stroke="#8a6a4a" stroke-width="17" fill="none" stroke-linecap="round"/>
+      <!-- 爪子 -->
+      <path d="M112 40 l-6 -12 M114 40 l1 -14 M117 41 l7 -12" stroke="#e8ded0" stroke-width="4.6" fill="none" stroke-linecap="round"/>
+      <path d="M196 40 l-6 -12 M198 40 l1 -14 M201 41 l7 -12" stroke="#e8ded0" stroke-width="4.6" fill="none" stroke-linecap="round"/>
+      <!-- 身体 -->
+      <ellipse cx="155" cy="140" rx="62" ry="46" fill="#9a7854"/>
+      <ellipse cx="152" cy="146" rx="52" ry="37" fill="#b08a63" opacity=".65"/>
+      <!-- 毛上的藻（绿斑，可辨识的共生线索） -->
+      <g fill="#5d8f66" opacity=".55">
+        <ellipse cx="128" cy="124" rx="11" ry="6" transform="rotate(-18 128 124)"/>
+        <ellipse cx="176" cy="132" rx="13" ry="6" transform="rotate(12 176 132)"/>
+        <ellipse cx="150" cy="166" rx="15" ry="7" transform="rotate(-6 150 166)"/>
+        <ellipse cx="196" cy="156" rx="8" ry="5" transform="rotate(24 196 156)"/>
+      </g>
+      <!-- 后腿 -->
+      <path d="M112 170 C 100 186, 98 198, 104 208" stroke="#8a6a4a" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M198 170 C 210 186, 212 198, 206 208" stroke="#8a6a4a" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M104 206 l-8 8 M107 209 l-2 11 M110 207 l6 9" stroke="#e8ded0" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M206 206 l8 8 M203 209 l2 11 M200 207 l-6 9" stroke="#e8ded0" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- 头（朝向观者，微笑） -->
+      <ellipse cx="155" cy="112" rx="38" ry="33" fill="#c39a70"/>
+      <ellipse cx="155" cy="116" rx="27" ry="23" fill="#e0c39c"/>
+      <!-- 眼罩 -->
+      <ellipse cx="140" cy="110" rx="11" ry="9" fill="#5b3f2a" opacity=".8"/>
+      <ellipse cx="170" cy="110" rx="11" ry="9" fill="#5b3f2a" opacity=".8"/>
+      <circle cx="141" cy="110" r="3.1" fill="#141c18"/>
+      <circle cx="169" cy="110" r="3.1" fill="#141c18"/>
+      <circle cx="142.2" cy="108.8" r="1" fill="#fff" opacity=".85"/>
+      <circle cx="170.2" cy="108.8" r="1" fill="#fff" opacity=".85"/>
+      <!-- 鼻子与嘴 -->
+      <ellipse cx="155" cy="122" rx="5" ry="3.6" fill="#3a2a1e"/>
+      <path d="M147 130 q8 7 16 0" stroke="#4a3423" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="rebuild">重建版 · REBUILT 2026-09-14</div>
+  <h1>树獭这么懒，<br>它是怎么活下来的？</h1>
+  <p class="sub">这是一个孩子问的问题。<br>答案花了 3500 万年才写完——而且它还在写。</p>
+  <a href="#intuition" class="cta">先别看数据，先想一件事 →</a>
+  <div class="meta">适合 8 岁以上 · 不需要任何背景知识 · 约 8 分钟 · 每个数字都标了论文来源</div>
+</section>
+
+<main>
+
+<!-- ════ 第零章：直觉 ════ -->
+<section class="chapter" id="intuition">
+  <div class="chapter-num">第零章 · 先给直觉</div>
+  <h2>如果有一种活法，是这样的</h2>
+  <p class="lede">费曼说：如果你不能把它讲给一个孩子听懂，说明你自己也还没懂。所以先从「活法」开始，数据放在后面。</p>
+
+  <div class="analogy">
+    <div class="label">先想象你自己</div>
+    <p>你每天睡 <strong>10 个小时</strong>，白天绝大多数时间一动不动。</p>
+    <p>你身体运转需要的能量，只有同样体重的人类的 <strong>不到一半</strong>。</p>
+    <p>你一天只吃一种食物——<strong>树叶</strong>。而一片叶子在你肚子里要待 <strong>将近一个月</strong>才走完。</p>
+    <p>你的体温不是恒定的，会跟着天气上下浮动，像蛇一样。</p>
+  </div>
+
+  <p>听起来，这是一个活得很勉强的设计，对吧？任何一种正常的教科书都会告诉你：不够吃、动不了、跑不掉，就应该被淘汰。</p>
+  <p>但事实是：<strong>这套活法已经用了 3500 万年。</strong>而且它的使用者，至今还挂在南美洲的树冠上，安安稳稳地吃着别的动物不屑一顾的叶子。</p>
+  <p>所以真正的问题不是「它为什么没被淘汰」，而是——<strong>我们凭什么认为「快」才是对的？</strong></p>
+</section>
+
+<!-- ════ 第一章：三个数字 ════ -->
+<section class="chapter" id="numbers">
+  <div class="chapter-num">第一章 · 三个数字</div>
+  <h2>慢，是要付账单的</h2>
+  <p class="lede">树獭的「懒」不是性格，是账算出来的结果。它把三笔开支压到了哺乳动物的极限。</p>
+
+  <div class="cards c4">
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.9 6.9 0 0 0 11.1 11.1z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">≈ 10 <small>小时/天</small></div>
+      <div class="lab">睡眠</div>
+      <div class="desc">野外实测是 <strong>9.63 小时</strong>——比在动物园里测到的少了 6 个多小时。环境会改写答案。</div>
+      <span class="src">Rattenborg 等，2008，<em>Biology Letters</em><br><a href="https://doi.org/10.1098/rsbl.2008.0203" target="_blank" rel="noopener">doi.org/10.1098/rsbl.2008.0203</a></span>
+    </div>
+
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.5" y="7.5" width="16.5" height="9" rx="2.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="4.2" y="9.2" width="6.6" height="5.6" rx="1.1" fill="currentColor"/><path d="M21.2 10.7v2.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <div class="val">≈ 42 <small>%</small></div>
+      <div class="lab">能量需求</div>
+      <div class="desc">三趾树獭的<strong>基础代谢率</strong>只有「同体重哺乳动物期望值」的 42%。它每天的开销，不到别人一半。</div>
+      <span class="src">Gilmore 等，2001，<em>Braz J Med Biol Res</em><br><a href="https://doi.org/10.1590/S0100-879X2001000100002" target="_blank" rel="noopener">doi.org/10.1590/S0100-879X2001000100002</a></span>
+    </div>
+
+    <div class="card clay">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.6 16.8a8.6 8.6 0 1 1 16.8 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.8l4.4-5.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.4" r="1.5" fill="currentColor"/></svg>
+      <div class="val">≈ 45 <small>%</small></div>
+      <div class="lab">代谢率</div>
+      <div class="desc">二趾树獭的同一指标是 45%。两个科各走各的路，最后撞进了同一个「超级省电」区间。</div>
+      <span class="src">Gilmore 等，2001 · 史密斯学会国家动物园（40–45%）<br><a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">nationalzoo.si.edu/animals/two-toed-sloth</a></span>
+    </div>
+
+    <div class="card cyan">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4.2v12.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.6 12.2L12 17.6l5.4-5.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.6 20.4h14.8" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">最低 <small>记录</small></div>
+      <div class="lab">野外代谢率</div>
+      <div class="desc">三趾树獭的野外代谢率是<strong>已记录哺乳动物中最低的</strong>（162 kJ·天⁻¹·kg⁻⁰·⁷³⁴）。不是「之一」，是「最低」。</div>
+      <span class="src">Pauli 等，2016，<em>The American Naturalist</em><br><a href="https://doi.org/10.1086/687032" target="_blank" rel="noopener">doi.org/10.1086/687032</a></span>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="label">费曼小贴士 · 为什么要跟「期望值」比</div>
+    <p>一只 4 公斤的动物应该烧多少能量，生物学上有一条经验曲线（体型越大，单位体重耗能越低）。</p>
+    <p>把树獭放上这条曲线，它落在<strong>曲线的下面很远处</strong>——42% 到 45%。所以「省电」不是形容词，是一个可测量的位置。</p>
+  </div>
+</section>
+
+<!-- ════ 第二章：对比柱状图 ════ -->
+<section class="chapter" id="chart">
+  <div class="chapter-num">第二章 · 对比</div>
+  <h2>把数字放在一起看</h2>
+  <p class="lede">下面两根柱子是「同一件事的两种口径」，第三根是 100% 的基线。柱子会等你看清再长出来。</p>
+
+  <div class="chart" id="chart1">
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">三趾树獭（Bradypus）</span><span class="pct">42%</span></div>
+      <div class="chart-track"><div class="chart-fill g1" data-w="42%" style="--w:42%"></div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">二趾树獭（Choloepus）</span><span class="pct">45%</span></div>
+      <div class="chart-track"><div class="chart-fill g2" data-w="45%" style="--w:45%"></div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">同体重哺乳动物（期望值）</span><span class="pct">100%</span></div>
+      <div class="chart-track"><div class="chart-fill g3" data-w="100%" style="--w:100%"></div></div>
+    </div>
+    <p class="chart-note">纵轴 = 基础代谢率占「同体重哺乳动物期望值」的比例。<br>来源：<a href="https://doi.org/10.1590/S0100-879X2001000100002" target="_blank" rel="noopener">Gilmore 等 2001</a>（两个物种的具体百分比）· <a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">史密斯学会国家动物园</a>（40–45% 区间）</p>
+  </div>
+
+  <h3>再看一眼「睡觉」这件事</h3>
+  <p>同样是树獭，换一个测量地点，答案就变了——这是整个动物行为学里最值得记住的一课。</p>
+
+  <div class="chart" id="chart2">
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">野外的三趾树獭（脑电实测）</span><span class="pct">9.63 小时</span></div>
+      <div class="chart-track"><div class="chart-fill g1" data-w="60%" style="--w:60%"></div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">此前在圈养条件下的报告值</span><span class="pct">≈ 16 小时</span></div>
+      <div class="chart-track"><div class="chart-fill g4" data-w="100%" style="--w:100%"></div></div>
+    </div>
+    <p class="chart-note">2008 年，研究者第一次把微型脑电记录仪戴在<strong>自由的野生树獭</strong>身上，得到 9.63 小时/天——比圈养记录少 6 小时以上。<br>来源：<a href="https://doi.org/10.1098/rsbl.2008.0203" target="_blank" rel="noopener">Rattenborg 等 2008，Biology Letters</a></p>
+  </div>
+</section>
+
+<!-- ════ 第三章：毛 ════ -->
+<section class="chapter" id="fur">
+  <div class="chapter-num">第三章 · 它身上住着一座花园</div>
+  <h2>它的伪装，是活的</h2>
+  <p class="lede">树獭的毛不是只用来保暖的。它会「长绿」，而那层绿是别的生物。</p>
+
+  <p>每一根毛的表面有纵向的沟槽。两种<strong>蓝绿藻</strong>住在里面，在潮湿的时候把树獭染成一层绿。</p>
+  <p>这层绿在做一件事：<strong>让它从上往下看，像一团叶子。</strong>角雕（harpy eagle）从空中搜索猎物，靠的是形状和移动；一团静止的、绿色的、形状像叶子的东西，不在搜索列表的前排。</p>
+
+  <div class="cards">
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 4.2C11.2 4.2 5 8.6 5 15a4.8 4.8 0 0 0 4.9 4.8C16.4 19.8 20 13.9 20 4.2z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.2 17.2c2.4-4 5.4-6.6 9.4-8.6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">2 <small>种</small></div>
+      <div class="lab">毛上的蓝绿藻</div>
+      <div class="desc">长在毛的纵向沟槽里，潮湿条件下把毛染绿——伪装。有假说认为藻类也回馈微量元素，但这一条仍在讨论中。</div>
+      <span class="src">史密斯学会国家动物园 · <a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">Fact Sheet</a></span>
+    </div>
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7.2" y="5" width="3.6" height="14" rx="1.4" fill="currentColor"/><rect x="13.2" y="5" width="3.6" height="14" rx="1.4" fill="currentColor"/></svg>
+      <div class="val">90 <small>%</small></div>
+      <div class="lab">时间静止不动</div>
+      <div class="desc">三趾树獭大约 90% 的时间一动不动。它不靠逃，靠「不进入视野」。</div>
+      <span class="src">Wikipedia「Sloth」（汇编，条目内附一手引注）· 另见 <a href="https://doi.org/10.1086/687032" target="_blank" rel="noopener">Pauli 等 2016</a>（活动量极低）</span>
+    </div>
+    <div class="card clay">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4.2a2.2 2.2 0 0 1 2.2 2.2v8.2a4 4 0 1 1-4.4 0V6.4A2.2 2.2 0 0 1 12 4.2z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.4" r="1.9" fill="currentColor"/></svg>
+      <div class="val">30–34 <small>°C</small></div>
+      <div class="lab">活动时体温</div>
+      <div class="desc">比一般哺乳动物低，而且会随环境浮动（异温）。静止时还能更低——体温低，就等于少烧油。</div>
+      <span class="src">史密斯学会国家动物园 · <a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">Fact Sheet</a></span>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="label">这不是「脏」</div>
+    <p>人类看到绿毛会想到发霉。但树獭身上的藻是<strong>共生</strong>——它提供住所和阳光，藻提供伪装（也许还有营养）。</p>
+    <p>史密斯学会把它叫做「一个会走路的生态系统」（a walking ecosystem）：毛上还住着蛾子、蜱和甲虫。</p>
+  </div>
+</section>
+
+<!-- ════ 第四章：水 ════ -->
+<section class="chapter" id="water">
+  <div class="chapter-num">第四章 · 它其实会游泳</div>
+  <h2>陆地上最慢，水里却快 4 倍</h2>
+  <p class="lede">这是树獭身上最反直觉的一条：它在地面上几乎是个沙包，在水里是个运动员。</p>
+
+  <div class="chart">
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">在地面爬行（最快）</span><span class="pct">3 米/分钟</span></div>
+      <div class="chart-track"><div class="chart-fill g4" data-w="22%" style="--w:22%"></div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-head"><span class="name">在水里划水</span><span class="pct">13.5 米/分钟</span></div>
+      <div class="chart-track"><div class="chart-fill g3" data-w="100%" style="--w:100%"></div></div>
+    </div>
+    <p class="chart-note">约 <strong>4.5 倍</strong>。它用长前肢当桨，能横渡河流、在岛屿之间游泳。<br>来源：<a href="https://en.wikipedia.org/wiki/Sloth" target="_blank" rel="noopener">Wikipedia「Sloth」</a>（条目内附一手引注）· 游泳能力另见 <a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">史密斯学会国家动物园</a></p>
+  </div>
+
+  <p>为什么反直觉？因为「快」在这两套场景里由不同的物理决定。</p>
+  <p>在树上和地面：树獭的肌肉量只有同体型陆生哺乳动物的<strong>一半左右</strong>，而且它没有余粮去产生热量——肌肉是耗能大户，养不起。</p>
+  <p>在水里：浮力替它承担了体重，它不需要对抗重力，只需要划。于是那对长前肢终于物尽其用了。</p>
+</section>
+
+<!-- ════ 第五章：消化 ════ -->
+<section class="chapter" id="gut">
+  <div class="chapter-num">第五章 · 消化一个月</div>
+  <h2>它把「低质量燃料」榨到了极限</h2>
+  <p class="lede">叶子是世界上最难吃的食物之一：热量少、纤维多、还有毒。</p>
+
+  <div class="cards">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7v5.4l3.6 2.1" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">≈ 1 <small>个月</small></div>
+      <div class="lab">一片叶子在体内的旅程</div>
+      <div class="desc">食物在消化道里停留约一个月。慢，是提取能量的唯一办法。</div>
+      <span class="src">史密斯学会国家动物园 · 佛罗里达自然历史博物馆（2025）<br><a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">nationalzoo.si.edu</a></span>
+    </div>
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6c3.5 4.2 5.6 7 5.6 9.7a5.6 5.6 0 1 1-11.2 0c0-2.7 2.1-5.5 5.6-9.7z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">1 <small>次/周</small></div>
+      <div class="lab">排便频率</div>
+      <div class="desc">代谢慢到一周才排一次，而且要专门下到树根处。这趟「下楼」是它最危险的时刻之一。</div>
+      <span class="src">史密斯学会国家动物园 · <a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆</a></span>
+    </div>
+    <div class="card clay">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.2 3.4h5.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.6 3.6v5.2L5.6 17.6a2.4 2.4 0 0 0 2.1 3.4h8.6a2.4 2.4 0 0 0 2.1-3.4l-5-8.8V3.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">多室 <small>胃</small></div>
+      <div class="lab">发酵罐式消化道</div>
+      <div class="desc">像反刍动物一样用多室的胃慢慢发酵，让微生物替它分解纤维——只不过它做的每一件事都更慢。</div>
+      <span class="src">Wikipedia「Sloth」（汇编，条目内附一手引注）</span>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="label">把食物链翻译成人话</div>
+    <p>叶子 = 一份工资很低、但发得很稳的工作。别的动物不愿意干，因为换算成时薪太低。</p>
+    <p>树獭的做法是：<strong>接受低时薪，但把开销压到更低。</strong>它不加班、不出差、不社交，于是这份低工资刚好够用——而且没人跟它抢。</p>
+  </div>
+</section>
+
+<!-- ════ 第六章：时间线 ════ -->
+<section class="chapter" id="history">
+  <div class="chapter-num">第六章 · 历史</div>
+  <h2>3500 万年，和它那些巨型亲戚</h2>
+  <p class="lede">树獭不是「慢了几百万年」，它是从大一统的巨兽时代里，一路缩水活到了今天。</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="when">约 3700 万年前</div>
+      <h4>已知最古老的「像树獭的东西」</h4>
+      <p>阿根廷的 <em>Pseudoglyptodon</em>——科学家目前能合理称为树獭的最早近亲。</p>
+      <span class="src"><a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">3500 万年以上</div>
+      <h4>树獭家族的起源</h4>
+      <p>2025 年发表于《Science》的研究用古 DNA + 400 多件化石重建了树獭生命树，把谱系一直推回到 <strong>3500 万年以前</strong>。</p>
+      <span class="src"><a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">Boscaini 等 2025（Science），经佛罗里达自然历史博物馆通稿</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">约 500 万年前</div>
+      <h4>大地獭：约 8000 磅的亲戚</h4>
+      <p>大地獭属 <em>Megatherium</em> 出现（上新世），体重约 <strong>8000 磅（约 3.6 吨）</strong>，跟亚洲象一个量级——「像灰熊，但大五倍」。</p>
+      <span class="src">化石记录：<a href="https://paleobiodb.org/" target="_blank" rel="noopener">古生物学数据库</a>（上新世 Montehermosan 期有产出）· <a href="https://en.wikipedia.org/wiki/Megatherium" target="_blank" rel="noopener">Wikipedia「Megatherium」</a>（已知最早标本 ≥ 360 万年）· 体重：<a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">约 300 万年前</div>
+      <h4>巴拿马地峡升起，树獭北上</h4>
+      <p>地峡露出海面后，各种树獭一路向北，最远走到加拿大和阿拉斯加。</p>
+      <span class="src"><a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">约 1.2 万年前</div>
+      <h4>巨兽时代结束</h4>
+      <p>大地獭灭绝，与美洲多数大型哺乳动物一起，发生在末次冰期结束、人类到达美洲之后。活下来的，是<strong>最不需要什么的那一支</strong>。</p>
+      <span class="src"><a href="https://en.wikipedia.org/wiki/Megatherium" target="_blank" rel="noopener">Wikipedia「Megatherium」</a> · <a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">约 4500 年前</div>
+      <h4>最后一批树獭也消失了</h4>
+      <p>加勒比地区的树獭撑到了别处早已灭绝之后很久，直到人类抵达加勒比，它们才消失。</p>
+      <span class="src"><a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+    <div class="tl-item">
+      <div class="when">2008 年</div>
+      <h4>人类第一次在野外听懂它的睡眠</h4>
+      <p>微型脑电记录仪第一次戴在自由的野生树獭头上：<strong>9.63 小时/天</strong>，比圈养记录少 6 小时以上。</p>
+      <span class="src"><a href="https://doi.org/10.1098/rsbl.2008.0203" target="_blank" rel="noopener">Rattenborg 等 2008，Biology Letters</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 第七章：天敌 ════ -->
+<section class="chapter" id="enemies">
+  <div class="chapter-num">第七章 · 天敌与伪装</div>
+  <h2>「慢」不是隐身衣，只是把赔率调小</h2>
+  <p class="lede">这一章要特别小心：网上常说「树獭慢所以天敌看不见它」。事实没有这么漂亮。</p>
+
+  <p>捕食者确实很擅长捕捉<strong>移动</strong>。树獭移动极慢，又常待在树冠里，这会让它更难被立刻注意到。</p>
+  <p>但「更难被注意到」不等于「看不见」。角雕依然是树獭的重要天敌——它靠的不是发现移动，而是从高空把树冠当扫描区。<strong>慢只是降低了概率，不是免疫。</strong></p>
+
+  <div class="cards c4">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 14.6c3.4 0 5.4-1.4 6.9-3.9 1.5-2.5 3.4-3.9 5.9-3.9 2 0 3.4 1 4.4 2.4-1.2-.3-2.3 0-3.1.9 1.2 4.3-2.3 8.4-7.1 8.4-3.1 0-5.6-1.4-7-3.9z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">角雕 <small>Harpia harpyja</small></div>
+      <div class="lab">头号天敌</div>
+      <div class="desc">从空中搜索树冠的顶级捕食者。树獭的最有效的防御不是逃跑——它跑不过任何东西。</div>
+      <span class="src">Animal Diversity Web（密歇根大学动物博物馆）<br><a href="https://animaldiversity.org/accounts/Bradypus_pygmaeus/" target="_blank" rel="noopener">animaldiversity.org</a></span>
+    </div>
+    <div class="card clay">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6.9" cy="9.4" r="2.1" fill="currentColor"/><circle cx="12" cy="7.2" r="2.2" fill="currentColor"/><circle cx="17.1" cy="9.4" r="2.1" fill="currentColor"/><path d="M12 12.4c3 0 5 2.2 5 4.6 0 1.7-1.4 2.8-3.2 2.8-1 0-1.4-.4-1.8-.4s-.8.4-1.8.4C8.4 19.8 7 18.7 7 17c0-2.4 2-4.6 5-4.6z" fill="currentColor"/></svg>
+      <div class="val">猫科 <small>Felidae</small></div>
+      <div class="lab">美洲豹 · 虎猫 · 豹猫</div>
+      <div class="desc">树獭下树排便时最容易遇到它们——所以「一周一次」这件事本身也是风险测算的结果。</div>
+      <span class="src">Animal Diversity Web · <a href="https://animaldiversity.org/accounts/Bradypus_variegatus/" target="_blank" rel="noopener">Bradypus variegatus</a></span>
+    </div>
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 10.2h17M8 3.4v3.6M16 3.4v3.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">30–40 <small>年</small></div>
+      <div class="lab">野外寿命（为什么慢反而活得久）</div>
+      <div class="desc">这就是那道题的答案：<strong>省下来的能量，全变成了时间</strong>。同体重的哺乳动物大多活不到这个数。</div>
+      <span class="src">Animal Diversity Web（密歇根大学动物博物馆）：野外典型寿命 30–40 年<br><a href="https://animaldiversity.org/accounts/Bradypus_variegatus/" target="_blank" rel="noopener">animaldiversity.org/accounts/Bradypus_variegatus</a></span>
+    </div>
+
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.8v13" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.6 11.4L12 16.8l5.4-5.4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.6 20.2h14.8" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">100 <small>英尺</small></div>
+      <div class="lab">扛得住的坠落</div>
+      <div class="desc">有记载树獭从高达 100 英尺（约 30 米）的树上摔下仍存活——树栖生活的一个副产品：它又轻又「有弹性」。</div>
+      <span class="src"><a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">佛罗里达自然历史博物馆 2025</a></span>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="label">换个说法</div>
+    <p>树獭的生存策略不是「打赢」，甚至不是「跑掉」，而是：<strong>把自己从「目标」变成「背景」。</strong></p>
+    <p>它把最贵的两种能力——速度和体温——都退掉了，换来的是一份几乎没人竞争的食物，和一份<strong>野外通常 30 到 40 年</strong>的寿命。</p>
+  </div>
+</section>
+
+<!-- ════ 第八章：今天 ════ -->
+<section class="chapter" id="threats">
+  <div class="chapter-num">第八章 · 今天</div>
+  <h2>3500 万年才学会的活法，可能输给 30 年</h2>
+  <p class="lede">树獭熬过了巨型化、气候剧变、以及它所有的巨型亲戚。但它没熬过——也未必熬得过——我们。</p>
+
+  <div class="cards">
+    <div class="card">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l8.6 15.2H3.4L12 4z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 10v4.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.1" fill="currentColor"/></svg>
+      <div class="val">极危 <small>CR</small></div>
+      <div class="lab">侏儒三趾树獭</div>
+      <div class="desc">世界自然保护联盟（IUCN）红色名录列为<strong>极危</strong>。它只生活在巴拿马外海一座约 5 平方公里的小岛上。</div>
+      <span class="src">Animal Diversity Web（引 IUCN 红色名录）<br><a href="https://animaldiversity.org/accounts/Bradypus_pygmaeus/" target="_blank" rel="noopener">animaldiversity.org/accounts/Bradypus_pygmaeus</a></span>
+    </div>
+    <div class="card clay">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6.9" cy="9.4" r="2.1" fill="currentColor"/><circle cx="12" cy="7.2" r="2.2" fill="currentColor"/><circle cx="17.1" cy="9.4" r="2.1" fill="currentColor"/><path d="M12 12.4c3 0 5 2.2 5 4.6 0 1.7-1.4 2.8-3.2 2.8-1 0-1.4-.4-1.8-.4s-.8.4-1.8.4C8.4 19.8 7 18.7 7 17c0-2.4 2-4.6 5-4.6z" fill="currentColor"/></svg>
+      <div class="val">6 <small>种</small></div>
+      <div class="lab">今天全部剩下的树獭</div>
+      <div class="desc">历史上曾有几十种树獭。现在只剩 6 种（三趾 4 种、二趾 2 种）。</div>
+      <span class="src">佛罗里达自然历史博物馆 2025 · <a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">原文</a></span>
+    </div>
+    <div class="card leaf">
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.8h10v3.3L12 12l5 4.9v3.3H7v-3.3L12 12 7 7.1V3.8z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="val">慢 <small>= 来不及</small></div>
+      <div class="lab">它真正的脆弱之处</div>
+      <div class="desc">低代谢、低繁殖速度、极窄的食谱与栖息地——这套「省电」设计在面对砍伐、道路和旅游时，几百年都来不及适应。</div>
+      <span class="src">综合：史密斯学会国家动物园 · Animal Diversity Web（栖息地退化、旅游与非法猎捕为威胁因子）</span>
+    </div>
+  </div>
+
+  <p>所以「树獭活下来了」这句话，最好加一个时态：<strong>它活到了现在。</strong></p>
+  <p>它靠的不是强，是「不争」。而不争的前提，是有一片别人不要的雨林。那片雨林，是它的 3500 万年里唯一没变过的条件——也是眼下变得最快的那一个。</p>
+</section>
+
+<!-- ════ 第九章：测验 ════ -->
+<section class="chapter" id="quiz">
+  <div class="chapter-num">第九章 · 你记住了多少</div>
+  <h2>来试五道题</h2>
+  <p class="lede">答对有解释，答错也有——但两边的反馈不一样，所以别乱点。</p>
+
+  <div class="quiz" id="quiz-box">
+
+    <div class="quiz-q" data-qid="1">
+      <div class="q-text">1. 野生的三趾树獭，一天平均睡多久？</div>
+      <div class="opts">
+        <button type="button" class="opt" data-correct="false"><span class="mk">A</span>大约 20 小时</button>
+        <button type="button" class="opt" data-correct="true"><span class="mk">B</span>大约 9.6 小时</button>
+        <button type="button" class="opt" data-correct="false"><span class="mk">C</span>大约 3 小时</button>
+      </div>
+      <div class="fb" data-ok="对。2008 年，研究者第一次把微型脑电记录仪戴上自由的野生树獭：9.63 小时/天——比圈养时的记录少了 6 个多小时。同一个物种，换个环境，答案就变了。" data-no="再想一下。这个数字来自 2008 年第一次「野外脑电实测」，它比圈养环境下的报告值少了 6 小时以上——所以正确答案不是最长的那一个。"></div>
+    </div>
+
+    <div class="quiz-q" data-qid="2">
+      <div class="q-text">2. 树獭的基础代谢率，大约是同体重哺乳动物「期望值」的多少？</div>
+      <div class="opts">
+        <button type="button" class="opt" data-correct="false"><span class="mk">A</span>大约 100%</button>
+        <button type="button" class="opt" data-correct="false"><span class="mk">B</span>大约 10%</button>
+        <button type="button" class="opt" data-correct="true"><span class="mk">C</span>大约 42%–45%</button>
+      </div>
+      <div class="fb" data-ok="对。三趾树獭约 42%，二趾树獭约 45%（Gilmore 等 2001）。史密斯学会给的是 40–45% 区间。它不是「有点省」，它落在经验曲线的下面很远。" data-no="不对。树獭的省电程度是可以量出来的：把它放到「同体重哺乳动物的耗能曲线」上，它落在 42%–45% 的位置。既没有接近 100%，也没有低到只剩一成。"></div>
+    </div>
+
+    <div class="quiz-q" data-qid="3">
+      <div class="q-text">3. 树獭在哪里的移动速度更快？</div>
+      <div class="opts">
+        <button type="button" class="opt" data-correct="false"><span class="mk">A</span>在地面爬行更快</button>
+        <button type="button" class="opt" data-correct="true"><span class="mk">B</span>在水里划水更快</button>
+        <button type="button" class="opt" data-correct="false"><span class="mk">C</span>两边一样快</button>
+      </div>
+      <div class="fb" data-ok="对。在地面它最快约 3 米/分钟；在水里约 13.5 米/分钟，差不多 4.5 倍。因为浮力替它扛住了体重，而它那对长前肢本来就是为「抓」而生的。" data-no="反了。它在地面上几乎是所有哺乳动物里最慢的（最快约 3 米/分钟），但一到水里就快得多（约 13.5 米/分钟）——浮力替它解决了体重问题。"></div>
+    </div>
+
+    <div class="quiz-q" data-qid="4">
+      <div class="q-text">4. 已灭绝的大地獭（Megatherium）有多大？</div>
+      <div class="opts">
+        <button type="button" class="opt" data-correct="false"><span class="mk">A</span>跟一只小狗差不多</button>
+        <button type="button" class="opt" data-correct="true"><span class="mk">B</span>跟一头亚洲象一个量级</button>
+        <button type="button" class="opt" data-correct="false"><span class="mk">C</span>跟一只猫差不多</button>
+      </div>
+      <div class="fb" data-ok="对。约 8000 磅（约 3.6 吨），跟亚洲象一个量级。佛罗里达自然历史博物馆的研究者形容它：「看起来像灰熊，但大五倍。」" data-no="再想想。大地獭是树獭家族里的巨兽：约 8000 磅、3.6 吨，研究者形容它「像灰熊，但大五倍」——现在树上那些小树獭，是缩水之后的幸存者。"></div>
+    </div>
+
+    <div class="quiz-q" data-qid="5">
+      <div class="q-text">5. 树獭毛上的那层绿色，是什么？</div>
+      <div class="opts">
+        <button type="button" class="opt" data-correct="false"><span class="mk">A</span>泥土和苔藓</button>
+        <button type="button" class="opt" data-correct="true"><span class="mk">B</span>长在毛沟槽里的活藻类</button>
+        <button type="button" class="opt" data-correct="false"><span class="mk">C</span>一种皮肤色素</button>
+      </div>
+      <div class="fb" data-ok="对。两种蓝绿藻长在毛的纵向沟槽里，潮湿时把毛染绿。这不是脏，是共生——史密斯学会因此把树獭叫做「一个会走路的生态系统」。" data-no="不是脏，也不是色素。树獭每根毛都有纵向沟槽，里面住着活的蓝绿藻；潮湿时它们把毛染成绿色，等于一件会呼吸的伪装服。"></div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- ════ 末页引言 ════ -->
+<section class="finale" id="finale">
+  <div class="quote-card">
+    <div class="q">树獭不是懒。<br>它只是找到了一个不需要奔跑的比赛。</div>
+    <div class="q2">
+      3500 万年里，它把速度、体温、肌肉和胃口一件件退回去，<br>
+      换来一片没人要的叶子，和一棵可以挂很久的树。<br>
+      它没有赢——它退出了那场比赛。
+    </div>
+    <div class="by">
+      末页按语 · 本页为重建版（原页源码已遗失），文字与数据重新核对<br>
+      文中唯一直接引语来自佛罗里达自然历史博物馆 2025 年通稿：<br>
+      「它们看起来像灰熊，但大五倍。」— Rachel Narducci，脊椎古生物收藏主管
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-in">
+    <h3>来源清单（每个数字都能点开）</h3>
+    <ul class="srclist">
+      <li>Rattenborg, N.C. 等（2008）〈Sleeping outside the box: electroencephalographic measures of sleep in sloths inhabiting a rainforest〉，<em>Biology Letters</em> 4(4): 402–405。野外睡眠 9.63 小时/天 —— <a href="https://doi.org/10.1098/rsbl.2008.0203" target="_blank" rel="noopener">doi.org/10.1098/rsbl.2008.0203</a></li>
+      <li>Gilmore, D.P., Da Costa, C.P. &amp; Duarte, D.P.F.（2001）〈Sloth biology: an update on their physiological ecology, behavior and role as vectors of arthropods and arboviruses〉，<em>Brazilian Journal of Medical and Biological Research</em> 34(1): 9–25。基础代谢率为期望值的 42%（三趾）/ 45%（二趾） —— <a href="https://doi.org/10.1590/S0100-879X2001000100002" target="_blank" rel="noopener">doi.org/10.1590/S0100-879X2001000100002</a></li>
+      <li>Pauli, J.N., Peery, M.Z., Fountain, E.D. &amp; Karasov, W.H.（2016）〈Arboreal Folivores Limit Their Energetic Output, All the Way to Slothfulness〉，<em>The American Naturalist</em> 188(2)。三趾树獭野外代谢率 162 kJ·天⁻¹·kg⁻⁰·⁷³⁴，为有记录哺乳动物中最低 —— <a href="https://doi.org/10.1086/687032" target="_blank" rel="noopener">doi.org/10.1086/687032</a></li>
+      <li>Smithsonian's National Zoo &amp; Conservation Biology Institute，〈Two-toed sloth〉物种事实表。代谢率 40–45%、体温 30–34 °C、消化约一个月、每周排便一次、藻类共生 —— <a href="https://nationalzoo.si.edu/animals/two-toed-sloth" target="_blank" rel="noopener">nationalzoo.si.edu/animals/two-toed-sloth</a></li>
+      <li>Boscaini, A. 等（2025），<em>Science</em>（树獭古 DNA + 400 余件化石重建树獭生命树）；经 Florida Museum of Natural History 2025-05-22 通稿转述。谱系推回 3500 万年以上、<em>Pseudoglyptodon</em> 约 3700 万年、大地獭约 8000 磅、现仅存 6 种 —— <a href="https://www.floridamuseum.ufl.edu/science/scientists-have-figured-out-how-extinct-giant-ground-sloths-got-so-big-and-where-it-all-went-wrong/" target="_blank" rel="noopener">floridamuseum.ufl.edu</a></li>
+      <li>Animal Diversity Web（密歇根大学动物博物馆），〈<em>Bradypus variegatus</em>〉〈<em>Bradypus pygmaeus</em>〉物种条目。天敌构成、藻类共生、<strong>野外寿命 30–40 年</strong>、侏儒三趾树獭 IUCN 极危 —— <a href="https://animaldiversity.org/accounts/Bradypus_pygmaeus/" target="_blank" rel="noopener">animaldiversity.org/accounts/Bradypus_pygmaeus</a></li>
+      <li>Wikipedia〈Sloth〉〈Megatherium〉（二级汇编，两页均逐条附一手引注）。原地速度 3 米/分钟、游泳 13.5 米/分钟、90% 时间不动、大地獭化石年代范围 —— <a href="https://en.wikipedia.org/wiki/Sloth" target="_blank" rel="noopener">en.wikipedia.org/wiki/Sloth</a> · <a href="https://en.wikipedia.org/wiki/Megatherium" target="_blank" rel="noopener">en.wikipedia.org/wiki/Megatherium</a></li>
+      <li>The Paleobiology Database（古生物学数据库），<em>Megatherium</em> 产出记录（含上新世 Montehermosan 期） —— <a href="https://paleobiodb.org/" target="_blank" rel="noopener">paleobiodb.org</a></li>
+    </ul>
+    <div class="honest">
+      <strong>科学诚实声明（重建版）</strong><br>
+      ① 本页所有数字均标注来源；凡未能核实的说法一律不写。<br>
+      ② 「大地獭约 500 万年」为取整表述：化石记录显示该属出现于上新世，古生物学数据库有 Montehermosan 期（约 530–360 万年前）产出，而已知最古老的确切标本 ≥ 360 万年，灭绝于约 1.2 万年前 —— 因此「约 360–500 万年」比任何单一整数更准确。<br>
+      ③ 「4200 万年前」一类的流行说法未被采用（不同文献的谱系起源口径不一致，本页采用 2025 年《Science》研究口径：3500 万年以上）。<br>
+      ④ 「寿命 30–40 年」为 <em>Bradypus variegatus</em> 的野外典型值，来源为密歇根大学 ADW 物种条目；跨物种推广时请保留这一限定。<br>
+      ⑤ 藻类是否向树獭提供营养，学界仍有争议，本页按「假说」表述。<br>
+      ⑥ 「慢所以天敌看不见」这一流行说法本页未采用，见第七章：慢只降低被发现概率，不等于免疫。<br>
+      ⑦ 本页为<strong>重建版</strong>：原页面源码已遗失，本页依据原页的选题、结构与更正后的数据重新撰写与绘制，不是原文件的副本。
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) document.body.classList.add('reduced');
+
+  /* ── 动效 1：背景漂浮粒子 ── */
+  (function particles() {
+    if (reduce) return;
+    var host = document.getElementById('particles');
+    if (!host) return;
+    var kinds = ['leaf', 'gold', 'cyan', 'leaf', 'gold'];
+    var n = window.innerWidth < 600 ? 12 : 20;
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < n; i++) {
+      var s = document.createElement('span');
+      s.className = 'particle ' + kinds[i % kinds.length];
+      var size = 2 + Math.random() * 5;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = (Math.random() * 100).toFixed(2) + '%';
+      s.style.animationDuration = (11 + Math.random() * 12).toFixed(2) + 's';
+      s.style.animationDelay = (-Math.random() * 16).toFixed(2) + 's';
+      frag.appendChild(s);
+    }
+    host.appendChild(frag);
+  })();
+
+  /* ── 动效 2：柱状图滚动到可见时生长 + 章节淡入 ── */
+  function grow(root) {
+    var bars = root.querySelectorAll('.chart-fill');
+    for (var i = 0; i < bars.length; i++) {
+      (function (b, k) {
+        setTimeout(function () { b.style.width = b.getAttribute('data-w'); }, reduce ? 0 : 90 * k);
+      })(bars[i], i);
+    }
+  }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('revealed');
+        if (en.target.querySelector && en.target.querySelector('.chart-fill')) grow(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+
+    var chapters = document.querySelectorAll('.chapter');
+    for (var i = 0; i < chapters.length; i++) io.observe(chapters[i]);
+  } else {
+    var all = document.querySelectorAll('.chapter');
+    for (var j = 0; j < all.length; j++) all[j].classList.add('revealed');
+    grow(document);
+  }
+
+  /* ── 动效 6：测验反馈（答对 / 答错给不同反馈） ── */
+  var quiz = document.getElementById('quiz-box');
+  if (quiz) {
+    quiz.addEventListener('click', function (ev) {
+      var btn = ev.target.closest ? ev.target.closest('.opt') : null;
+      if (!btn || btn.classList.contains('locked')) return;
+      var box = btn.closest('.quiz-q');
+      var fb = box.querySelector('.fb');
+      var opts = box.querySelectorAll('.opt');
+      var isRight = btn.getAttribute('data-correct') === 'true';
+      var i;
+
+      for (i = 0; i < opts.length; i++) {
+        opts[i].classList.add('locked');
+        opts[i].setAttribute('disabled', 'disabled');
+      }
+      if (isRight) {
+        btn.classList.add('right');
+        if (fb) { fb.textContent = fb.getAttribute('data-ok'); fb.className = 'fb show ok'; }
+      } else {
+        btn.classList.add('wrong');
+        for (i = 0; i < opts.length; i++) {
+          if (opts[i].getAttribute('data-correct') === 'true') opts[i].classList.add('right');
+        }
+        if (fb) { fb.textContent = fb.getAttribute('data-no'); fb.className = 'fb show no'; }
+      }
+    });
+  }
+
+  /* 顶栏当前章节高亮 */
+  var links = document.querySelectorAll('nav a');
+  var sections = [];
+  for (var k = 0; k < links.length; k++) {
+    var id = (links[k].getAttribute('href') || '').slice(1);
+    var el = id && document.getElementById(id);
+    if (el) sections.push([el, links[k]]);
+  }
+  if (sections.length && 'IntersectionObserver' in window) {
+    var nio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        for (var m = 0; m < sections.length; m++) sections[m][1].classList.remove('active');
+        for (var p = 0; p < sections.length; p++) {
+          if (sections[p][0] === en.target) sections[p][1].classList.add('active');
+        }
+      });
+    }, { threshold: 0.25 });
+    for (var q = 0; q < sections.length; q++) nio.observe(sections[q][0]);
+  }
+})();
+</script>
+</body>
+</html>
