@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Lincoln · A House Divided</title>
+<style>
+:root{--paper:#f5f0e8;--ink:#1a1a1a;--red:#8b1a1a;--blue:#1a2a4a;--gold:#c9a84c;--dark:#0d0d0d}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d0d;display:flex;justify-content:center;align-items:center;min-height:100dvh;padding:12px;font-family:Georgia,'Times New Roman',serif;font-display:swap;user-select:none;touch-action:none;contain:content}
+.book-stage{perspective:2200px;width:min(100% - 24px,440px);position:relative;display:flex;justify-content:center}
+.book-shadow{position:absolute;bottom:-10px;left:6%;width:88%;height:28px;background:radial-gradient(ellipse at center,rgba(0,0,0,.4) 0%,transparent 70%);filter:blur(12px);pointer-events:none;z-index:0}
+.book{position:relative;width:100%;aspect-ratio:3/4;transform-style:preserve-3d;z-index:1}
+.page{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;border-radius:2px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.page-current{z-index:2;filter:drop-shadow(0 4px 16px rgba(0,0,0,.35))}
+.page-underneath{z-index:1}
+.page-flipper{position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;transform-style:preserve-3d;transform-origin:left center;pointer-events:none;will-change:transform}
+.page-flipper .page-front,.page-flipper .page-back{position:absolute;top:0;left:0;width:100%;height:100%;backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.page-flipper .page-back{transform:rotateY(180deg)}
+.page-flipper .page-back::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#f5f0e8 0%,#ede5d5 50%,#f0e8d8 100%);opacity:.9;z-index:-1}
+.curl-shadow{position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none;opacity:0;background:linear-gradient(to right,rgba(0,0,0,.6) 0%,transparent 30%)}
+.nav-zone{position:absolute;top:0;height:100%;width:35%;z-index:10;cursor:pointer}
+.nav-left{left:0}.nav-right{right:0}
+.indicator{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:rgba(255,255,255,.85);padding:6px 18px;border-radius:16px;font-size:13px;z-index:20;backdrop-filter:blur(10px);pointer-events:none;font-family:-apple-system,'PingFang SC',sans-serif}
+
+/* Page styles — each page is a visual composition */
+.pg-cover{background:linear-gradient(170deg,#0d0d0d 0%,#1a1a2a 40%,#1a2a4a 100%);color:var(--paper);text-align:center}
+.pg-dark{background:linear-gradient(180deg,#111 0%,#1a1a1a 100%);color:var(--paper)}
+.pg-paper{background:linear-gradient(135deg,#f5f0e8 0%,#ede0cc 50%,#f0e8d8 100%);color:var(--ink)}
+.pg-blood{background:linear-gradient(170deg,#1a0a0a 0%,#2a1010 50%,#3a1515 100%);color:#d4a0a0}
+.pg-blue{background:linear-gradient(160deg,#0a1525 0%,#152540 50%,#1a3050 100%);color:#c0d0e0}
+.pg-dawn{background:linear-gradient(170deg,#1a1a2a 0%,#2a3040 40%,#4a5050 100%);color:#d0d0d0}
+
+.cover-divider{width:60px;height:3px;background:var(--gold);margin:24px auto}
+.cover-subtitle{font-size:clamp(11px,1.8vw,13px);letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:8px}
+.cover-title{font-size:clamp(28px,5vw,38px);font-weight:700;letter-spacing:.04em;line-height:1.2;margin-bottom:6px}
+.cover-author{font-size:clamp(10px,1.5vw,11px);color:rgba(255,255,255,.4);letter-spacing:.25em;text-transform:uppercase;margin-top:20px}
+
+.num-huge{font-size:clamp(60px,10vw,90px);font-weight:700;line-height:1;letter-spacing:-.02em}
+.num-context{font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.5);margin-top:8px;letter-spacing:.15em}
+.stat-label{font-size:clamp(11px,1.8vw,13px);text-transform:uppercase;letter-spacing:.25em;color:rgba(255,255,255,.4)}
+.stat-value{font-size:clamp(36px,6vw,52px);font-weight:700;margin:6px 0;line-height:1}
+.stat-detail{font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.45);margin-top:4px;text-align:center;max-width:80%}
+
+.quote{font-size:clamp(14px,2.4vw,18px);font-style:italic;line-height:1.6;text-align:center;max-width:85%}
+.quote-cite{font-size:clamp(10px,1.6vw,12px);color:rgba(0,0,0,.45);margin-top:12px;letter-spacing:.1em}
+.quote-dark-cite{font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.35);margin-top:12px;letter-spacing:.1em}
+
+.map-container{width:75%;aspect-ratio:1.4;position:relative;margin:12px auto}
+.map-bg{width:100%;height:100%;background:linear-gradient(135deg,#3a3020 0%,#4a4030 50%,#3a3525 100%);border:2px solid rgba(255,255,255,.2);border-radius:2px;position:relative;overflow:hidden}
+.map-north{position:absolute;top:8%;left:10%;right:5%;bottom:50%;background:rgba(30,40,80,.7);border-right:1px solid rgba(255,255,255,.15)}
+.map-south{position:absolute;top:55%;left:15%;right:8%;bottom:8%;background:rgba(80,30,30,.7);border-right:1px solid rgba(255,255,255,.15)}
+.map-label{position:absolute;font-size:clamp(8px,1.2vw,10px);letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.map-border{position:absolute;top:46%;left:3%;right:0;height:12%;border-top:1px dashed rgba(255,255,255,.2);border-bottom:1px dashed rgba(255,255,255,.2)}
+
+.divider{width:50px;height:2px;background:var(--red);margin:16px auto;opacity:.5}
+.divider-light{width:50px;height:2px;background:rgba(255,255,255,.25);margin:16px auto}
+.divider-gold{width:50px;height:2px;background:var(--gold);margin:16px auto;opacity:.7}
+
+.star{color:var(--gold);font-size:clamp(15px,2.5vw,20px);letter-spacing:.3em;margin-bottom:12px}
+.cross{font-size:clamp(20px,3vw,28px);color:var(--red);margin:12px 0}
+.peace{font-size:clamp(18px,2.8vw,24px);color:var(--gold);margin:8px 0;letter-spacing:.2em}
+
+@media(min-width:768px){.book-stage{width:min(100% - 48px,500px)}.indicator{bottom:32px;padding:8px 22px;font-size:14px}}
+@media(min-width:1024px){body{padding:32px}.book-stage{width:min(100% - 64px,550px)}.indicator{bottom:40px;padding:10px 28px}}
+@media(orientation:landscape) and (max-height:500px){.book-stage{width:auto;height:calc(100dvh - 40px)}.book{width:auto;height:100%}.indicator{bottom:6px;padding:3px 12px;font-size:11px}}
+
+/* SVG timeline for the scale page */
+.timeline{position:relative;width:80%;height:4px;background:rgba(255,255,255,.15);margin:16px auto;border-radius:2px}
+.timeline-dot{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="book-stage">
+  <div class="book-shadow"></div>
+  <div class="book" id="book"></div>
+  <div class="nav-zone nav-left" id="navLeft"></div>
+  <div class="nav-zone nav-right" id="navRight"></div>
+</div>
+<div class="indicator" id="indicator">Cover / 14</div>
+
+<script>
+(function(){
+'use strict';
+
+// 14 pages: Cover + 12 content + Back cover
+var pages=[
+  // [0] COVER
+  '<div class="pg-cover" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 24px">'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);letter-spacing:.4em;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:20px">Abraham Lincoln</div>'+
+    '<div class="cover-title" style="font-size:clamp(32px,5.5vw,46px);max-width:80%">A HOUSE<br/>DIVIDED</div>'+
+    '<div class="cover-divider"></div>'+
+    '<div class="cover-subtitle">The Price of Union</div>'+
+    '<div style="margin-top:24px;font-size:clamp(40px,6vw,56px);color:rgba(255,255,255,.06);position:absolute;bottom:60px">1861–1865</div>'+
+  '</div>',
+
+  // [1] ELECTION 1860
+  '<div class="pg-dark" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div class="stat-label">Popular Vote</div>'+
+    '<div class="num-huge" style="font-size:clamp(48px,8vw,72px)">40<span style="font-size:50%">%</span></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);margin-top:6px;text-align:center;max-width:80%">Lincoln won with the smallest<br/>popular vote share in American history</div>'+
+    '<div class="divider-light"></div>'+
+    '<div class="num-huge" style="font-size:clamp(36px,6vw,54px)">180</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.35);margin-top:4px">Electoral votes out of 303</div>'+
+    '<div style="font-size:clamp(9px,1.4vw,10px);color:rgba(255,255,255,.25);margin-top:8px">Southern states: <span style="color:var(--red)">0 votes</span></div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.3);margin-top:16px;text-align:center">"I am not bound to win,<br/>but I am bound to be true."</div>'+
+  '</div>',
+
+  // [2] FORT SUMTER
+  '<div class="pg-blood" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div class="stat-label">April 12, 1861</div>'+
+    '<div style="font-size:clamp(20px,3.5vw,28px);margin:12px 0;letter-spacing:.1em;color:#d08080">FORT SUMTER</div>'+
+    '<div style="width:60px;height:2px;background:rgba(255,255,255,.2);margin:12px auto"></div>'+
+    '<div style="font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.5);text-align:center;max-width:80%;line-height:1.7">The first shot.<br/>34 hours of bombardment.<br/>Zero casualties in battle.<br/><br/>But when the fort fell,<br/>Lincoln called for 75,000 volunteers.</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.3);margin-top:16px">Four more states seceded.</div>'+
+    '<div class="cross">†</div>'+
+  '</div>',
+
+  // [3] MAP - DIVIDED
+  '<div class="pg-blue" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 20px">'+
+    '<div class="stat-label" style="color:rgba(255,255,255,.4)">1861 — The Divided States</div>'+
+    '<div class="map-container"><div class="map-bg">'+
+      '<div class="map-north"></div><div class="map-south"></div>'+
+      '<div class="map-border"></div>'+
+    '</div></div>'+
+    '<div style="display:flex;gap:24px;margin-top:8px;font-size:clamp(9px,1.4vw,11px)">'+
+      '<span style="color:#8090c0">■ North: 23 states</span>'+
+      '<span style="color:#c08080">■ South: 11 states</span>'+
+    '</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.35);margin-top:12px;text-align:center;max-width:80%">One nation, two economies,<br/>two visions of the future.</div>'+
+  '</div>',
+
+  // [4] ANTIETAM
+  '<div class="pg-blood" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div class="stat-label">September 17, 1862</div>'+
+    '<div class="num-huge" style="font-size:clamp(48px,8vw,68px);color:#e0a0a0">23,000</div>'+
+    '<div style="font-size:clamp(11px,1.8vw,14px);color:rgba(255,255,255,.5);margin-top:4px">casualties in a single day</div>'+
+    '<div class="divider" style="background:rgba(255,255,255,.2)"></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.35);text-align:center;max-width:80%;line-height:1.7">The bloodiest twelve hours<br/>in American history.<br/><br/>Still.</div>'+
+    '<div style="font-size:clamp(9px,1.4vw,10px);color:rgba(255,255,255,.2);margin-top:12px">Dunker Church · The Cornfield · Burnside Bridge</div>'+
+  '</div>',
+
+  // [5] WAITING
+  '<div class="pg-dark" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);letter-spacing:.2em;color:rgba(255,255,255,.35);text-transform:uppercase">September–December 1862</div>'+
+    '<div style="font-size:clamp(16px,2.8vw,22px);color:rgba(255,255,255,.5);margin-top:20px;text-align:center;max-width:85%;line-height:1.6;font-style:italic">"If I could save the Union without freeing any slave I would do it; and if I could save it by freeing all the slaves I would do it; and if I could save it by freeing some and leaving others alone, I would also do that."</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.3);margin-top:12px">— Letter to Horace Greeley, Aug 1862</div>'+
+    '<div class="divider-light"></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);text-align:center;max-width:80%">He was waiting. For a Union victory.<br/>Antietam was enough.</div>'+
+  '</div>',
+
+  // [6] EMANCIPATION
+  '<div class="pg-dawn" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div class="stat-label" style="color:rgba(255,255,255,.5)">January 1, 1863</div>'+
+    '<div style="font-size:clamp(18px,3vw,26px);text-align:center;max-width:85%;letter-spacing:.05em;color:var(--gold);line-height:1.4;margin:16px 0">EMANCIPATION<br/>PROCLAMATION</div>'+
+    '<div style="width:50px;height:2px;background:var(--gold);opacity:.5;margin:12px auto"></div>'+
+    '<div style="font-size:clamp(12px,2vw,14px);color:rgba(255,255,255,.5);text-align:center;max-width:80%;line-height:1.7">The war had a new meaning.<br/><br/>It was no longer just about saving the Union.<br/>It was about what kind of Union would be saved.</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.35);margin-top:16px">"I never in my life felt more certain<br/>that I was doing right."</div>'+
+  '</div>',
+
+  // [7] 620,000
+  '<div class="pg-blood" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px">'+
+    '<div class="num-huge" style="font-size:clamp(52px,9vw,82px);color:#d08080;letter-spacing:-.02em">620,000</div>'+
+    '<div class="stat-label" style="margin-top:4px">AMERICAN LIVES</div>'+
+    '<div class="divider" style="background:rgba(255,255,255,.15)"></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);text-align:center;max-width:85%;line-height:1.8">'+
+      'More than all American wars<br/>combined — until Vietnam.<br/><br/>'+
+      '<span style="color:rgba(255,255,255,.25)">2% of the entire U.S. population.<br/>Equivalent today: 7 million.</span>'+
+    '</div>'+
+    '<div style="font-size:clamp(9px,1.4vw,10px);color:rgba(255,255,255,.2);margin-top:16px">North ≈ 360,000 · South ≈ 260,000</div>'+
+  '</div>',
+
+  // [8] GETTYSBURG
+  '<div class="pg-blue" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px">'+
+    '<div class="stat-label" style="color:rgba(255,255,255,.4)">November 19, 1863</div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.35);margin-top:4px;letter-spacing:.15em">GETTYSBURG, PENNSYLVANIA</div>'+
+    '<div style="width:40px;height:2px;background:var(--gold);margin:16px auto;opacity:.7"></div>'+
+    '<div style="font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.55);text-align:center;max-width:88%;line-height:1.8;font-style:italic">'+
+      '"Four score and seven years ago<br/>our fathers brought forth on this continent,<br/>a new nation…"</div>'+
+    '<div class="divider-light"></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);text-align:center;max-width:80%">'+
+      '<span style="font-size:clamp(16px,2.6vw,20px);font-weight:700;color:var(--gold)">272</span> words.<br/>'+
+      '<span style="font-size:clamp(14px,2.2vw,18px);font-weight:700;color:var(--gold)">2</span> minutes.<br/><br/>'+
+      'The speaker before him spoke for 2 hours.<br/>Nobody remembers what he said.</div>'+
+  '</div>',
+
+  // [9] 1864 — SHERMAN + REELECTION
+  '<div class="pg-dark" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px">'+
+    '<div class="stat-label">1864</div>'+
+    '<div style="font-size:clamp(22px,3.8vw,32px);letter-spacing:.08em;margin:8px 0">TOTAL WAR</div>'+
+    '<div style="width:40px;height:2px;background:rgba(255,255,255,.15);margin:12px auto"></div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);text-align:center;max-width:85%;line-height:1.7">Sherman\'s March to the Sea.<br/>Atlanta to Savannah.<br/>300 miles of destruction.<br/><br/>"War is cruelty. The crueler it is,<br/>the sooner it will be over."</div>'+
+    '<div class="divider-light"></div>'+
+    '<div style="font-size:clamp(14px,2.2vw,18px);color:var(--gold)">Reelected</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.3);margin-top:4px">November 8, 1864 — 55% of the vote</div>'+
+  '</div>',
+
+  // [10] 13th AMENDMENT
+  '<div class="pg-paper" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px">'+
+    '<div class="stat-label" style="color:rgba(0,0,0,.4)">January 31, 1865</div>'+
+    '<div style="font-size:clamp(18px,3vw,26px);font-weight:700;letter-spacing:.05em;text-align:center;line-height:1.3;margin:12px 0">THE THIRTEENTH<br/>AMENDMENT</div>'+
+    '<div class="divider"></div>'+
+    '<div style="font-size:clamp(12px,2vw,14px);color:rgba(0,0,0,.5);text-align:center;max-width:82%;line-height:1.8;font-style:italic">"Neither slavery nor involuntary servitude… shall exist within the United States."</div>'+
+    '<div style="font-size:clamp(14px,2.2vw,18px);font-weight:700;margin-top:12px">119 – 56</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(0,0,0,.35)">House vote. Passed by 2 votes.</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(0,0,0,.4);margin-top:12px;text-align:center">Illinois ratified it the very next day.<br/>18 states followed in Lincoln' + "'" + 's lifetime.<br/>He fell short of the 27 needed.</div>'+
+  '</div>',
+
+  // [11] APPOMATTOX
+  '<div class="pg-dawn" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px">'+
+    '<div class="stat-label" style="color:rgba(255,255,255,.5)">April 9, 1865</div>'+
+    '<div style="font-size:clamp(18px,3vw,28px);color:var(--gold);letter-spacing:.1em;margin:8px 0">APPOMATTOX</div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);margin-bottom:12px">Court House, Virginia</div>'+
+    '<div style="width:40px;height:2px;background:var(--gold);margin:8px auto;opacity:.7"></div>'+
+    '<div style="font-size:clamp(12px,2vw,14px);color:rgba(255,255,255,.55);text-align:center;max-width:85%;line-height:1.8;font-style:italic">"Let them have their horses.<br/>They will need them for the spring plowing."</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.35);margin-top:12px">— Lincoln\'s instructions to Grant</div>'+
+    '<div class="peace">☮</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.4)">The war is over.</div>'+
+  '</div>',
+
+  // [12] FORD'S THEATRE
+  '<div class="pg-dark" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 22px">'+
+    '<div class="stat-label">April 14, 1865</div>'+
+    '<div style="font-size:clamp(14px,2.2vw,18px);color:rgba(255,255,255,.5);letter-spacing:.15em;margin:8px 0">FORD\'S THEATRE</div>'+
+    '<div class="divider-light"></div>'+
+    '<div class="num-huge" style="font-size:clamp(42px,7vw,60px);color:var(--red);opacity:.8">5</div>'+
+    '<div style="font-size:clamp(11px,1.8vw,13px);color:rgba(255,255,255,.4);margin-top:4px">Days after Appomattox</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.3);text-align:center;max-width:80%;line-height:1.7;margin-top:12px">'+
+      '10:15 PM. John Wilkes Booth entered the box.<br/>'+
+      'A single shot to the back of the head.<br/><br/>'+
+      'The President who had guided the nation<br/>'+
+      'through its darkest hour<br/>'+
+      'did not live to see the sunrise.</div>'+
+  '</div>',
+
+  // [13] BACK COVER
+  '<div class="pg-dark" style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 24px">'+
+    '<div style="font-size:clamp(40px,7vw,56px);font-weight:700;color:var(--gold);letter-spacing:.06em">ONE</div>'+
+    '<div style="font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.5);margin-top:8px;letter-spacing:.2em;text-transform:uppercase">Nation · Indivisible</div>'+
+    '<div class="cover-divider"></div>'+
+    '<div class="quote" style="color:rgba(255,255,255,.45);font-size:clamp(11px,1.8vw,14px);max-width:80%">"Government of the people,<br/>by the people, for the people,<br/>shall not perish from the earth."</div>'+
+    '<div style="font-size:clamp(10px,1.6vw,12px);color:rgba(255,255,255,.25);margin-top:16px">Gettysburg · November 19, 1863</div>'+
+    '<div style="font-size:clamp(9px,1.4vw,10px);color:rgba(255,255,255,.15);margin-top:24px">1861 — 1865</div>'+
+  '</div>'
+];
+
+var N=pages.length, cur=0, flip=false;
+var bk=document.getElementById('book'), ind=document.getElementById('indicator');
+
+function gP(i){return bk.querySelector('.page[data-page="'+i+'"]')}
+function sP(i,z,c){var e=gP(i);if(!e)return;e.style.display='flex';e.style.zIndex=z;if(c)e.className='page '+c}
+function hA(){var p=bk.querySelectorAll('.page');for(var i=0;i<p.length;i++)p[i].style.display='none'}
+function uI(){ind.textContent=(cur===0?'Cover':cur===N-1?'Back':'Page '+cur)+' / '+N}
+
+function rC(){hA();sP(cur,2,'page-current');uI()}
+function cl(){var f=bk.querySelector('.page-flipper');if(f)f.remove();var s=bk.querySelector('.curl-shadow');if(s)s.remove()}
+
+// Build initial pages
+for(var i=0;i<N;i++){
+  var d=document.createElement('div');
+  d.className='page';d.dataset.page=i;
+  d.innerHTML=pages[i];
+  d.style.display=i===0?'flex':'none';
+  bk.appendChild(d);
+}
+
+function doFlip(dst,dir){
+  if(flip||dst<0||dst>=N)return;
+  var t=dst>cur?cur:dst;
+  flip=true;
+  hA();
+  sP(dst,1,'page-underneath');
+  if(dir<0)sP(cur,2,'page-current');
+
+  // Curl shadow
+  var sh=document.createElement('div');
+  sh.className='curl-shadow';
+  if(dir>0)sh.style.cssText='background:linear-gradient(to right,rgba(0,0,0,.6) 0%,transparent 30%)';
+  else sh.style.cssText='background:linear-gradient(to left,rgba(0,0,0,.6) 0%,transparent 30%)';
+  bk.appendChild(sh);
+
+  // Flipper
+  var fl=document.createElement('div');
+  fl.className='page-flipper';
+  if(dir<0)fl.style.transform='perspective(2200px) rotateY(-180deg)';
+
+  var fr=document.createElement('div');
+  fr.className='page-front';
+  fr.innerHTML=pages[t];
+  var ba=document.createElement('div');
+  ba.className='page-back';
+  fl.appendChild(fr);fl.appendChild(ba);
+  bk.appendChild(fl);
+
+  // Animate
+  sh.style.opacity='0.4';
+  fl.style.transition='transform 0.65s cubic-bezier(0.22,0.46,0.4,0.94)';
+  fl.offsetHeight;
+  if(dir>0)fl.style.transform='perspective(2200px) rotateY(-180deg)';
+  else fl.style.transform='perspective(2200px) rotateY(0deg)';
+
+  var done=function(){cur=dst;cl();rC();flip=false};
+  // 2026-09-11 修复：原用 arguments.callee，严格模式下抛错导致每次翻页都退化为 1200ms 兜底
+  var onEnd=function(){fl.removeEventListener('transitionend',onEnd);done()};
+  fl.addEventListener('transitionend',onEnd);
+  setTimeout(function(){if(flip){flip=false;cl();cur=dst;rC()}},1200);
+}
+
+function next(){doFlip(cur+1,1)}
+function prev(){doFlip(cur-1,-1)}
+
+document.getElementById('navRight').addEventListener('click',next);
+document.getElementById('navLeft').addEventListener('click',prev);
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next()}
+  if(e.key==='ArrowLeft'){e.preventDefault();prev()}
+});
+
+var tx=0,sw=false;
+document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;sw=true},{passive:true});
+document.addEventListener('touchmove',function(e){if(sw)e.preventDefault()},{passive:false});
+document.addEventListener('touchend',function(e){
+  if(!sw)return;sw=false;
+  var dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>40){if(dx<0)next();else prev()}
+},{passive:true});
+
+hA();sP(0,2,'page-current');uI();
+
+})();
+</script>
+</body>
+</html>

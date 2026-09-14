@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>黎曼猜想：数学的珠穆朗玛 | 给牧之的探险地图</title>
+<meta name="description" content="一个 167 年没人登顶的数学高峰：素数、ζ 函数、零点与 Claude 的闯入。翻页书版。">
+<style>
+/* ═══════════════════════════════════════════════
+   黎曼猜想翻页书（2026-08-11）
+   基于 flipbook-template v1.0（Lincoln 同款引擎）
+   主题覆写：深色星空数学感（非纸色墨色，保留 1859 神秘感）
+   ═══════════════════════════════════════════════ */
+:root{
+  --paper:#0d1326;      /* 星空深蓝纸 */
+  --ink:#e8e6df;        /* 暖白墨 */
+  --accent:#e8b84b;     /* 星光金 */
+  --accent2:#7fd4c1;    /* 临界线青 */
+  --book-bg:#05070f;    /* 书外深空 */
+  --dim:#8b97ad;
+  --line:#1e2a44;
+  --red:#e07a6a;
+  --green:#8fce9e;
+  --font-serif:'Noto Serif SC','Songti SC','STSong',Georgia,serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--book-bg);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse at 20% -10%, rgba(232,184,75,.05) 0%, transparent 50%),
+                   radial-gradient(ellipse at 80% 20%, rgba(127,212,193,.04) 0%, transparent 45%);
+}
+/* 背景星空 */
+.stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.stars i{position:absolute;width:2px;height:2px;background:#cfd8e8;border-radius:50%;opacity:.5;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:.85}}
+
+.book-stage{position:relative;width:min(94vw,960px);height:min(86vh,700px);perspective:2200px;z-index:1}
+.book{position:absolute;inset:0;background:var(--paper);border-radius:6px 14px 14px 6px;box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);overflow:hidden}
+.book-shadow{position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 60px rgba(0,0,0,.35);pointer-events:none}
+
+.page{position:absolute;inset:0;padding:clamp(24px,4.5vw,52px);display:flex;flex-direction:column;background:var(--paper);overflow-y:auto;opacity:0;visibility:hidden;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.page.on{opacity:1;visibility:visible}
+.page-underneath{opacity:1;visibility:visible;z-index:0}
+.page-current{z-index:1}
+.page-flipper{position:absolute;top:0;bottom:0;left:0;width:50%;background:var(--paper);z-index:3;transform-origin:left center;transform:perspective(2200px) rotateY(0deg);transition:transform .9s cubic-bezier(.4,.1,.2,1)}
+.curl-shadow{position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+
+/* 封面 */
+.pg-cover{background:linear-gradient(160deg,#0d1326 0%,#101b36 55%,#0a0e1a 100%);color:var(--ink);justify-content:center;align-items:center;text-align:center}
+.pg-cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%, rgba(232,184,75,.14) 0%, transparent 55%);pointer-events:none}
+.cover-kicker{font-size:12px;letter-spacing:.4em;color:var(--accent);text-transform:uppercase;margin-bottom:26px}
+.cover-title{font-size:clamp(30px,5.5vw,50px);letter-spacing:.06em;line-height:1.3;font-weight:800;margin-bottom:20px;position:relative}
+.cover-title .accent{color:var(--accent)}
+.cover-divider{width:64px;height:2px;background:var(--accent);margin:0 auto 22px;opacity:.7}
+.cover-subtitle{font-size:clamp(12px,1.8vw,16px);letter-spacing:.3em;color:var(--dim);line-height:2;position:relative}
+
+/* 内容页 */
+.page-kicker{font-size:11px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+.page-title{font-size:clamp(21px,3.4vw,32px);line-height:1.35;margin-bottom:12px;font-weight:750}
+.page-title .q{color:var(--accent2);font-weight:400;font-size:.72em;display:block;margin-top:5px;letter-spacing:.05em}
+.page-body{font-size:clamp(13.5px,1.7vw,16.5px);line-height:1.9;color:#cfd5e2}
+.page-body p{margin-bottom:12px}
+.page-body strong{color:#fff;font-weight:650}
+.hook{color:var(--accent2);font-weight:600}
+.page-quote{border-left:3px solid var(--accent2);padding:12px 16px;background:rgba(127,212,193,.06);border-radius:0 10px 10px 0;margin:12px 0;font-size:clamp(13px,1.6vw,15.5px);line-height:1.8;color:#eef1f7}
+.page-quote .src{color:var(--dim);font-size:12px;margin-top:6px}
+.page-data{font-size:clamp(32px,5vw,48px);font-weight:800;color:var(--accent);margin:10px 0 2px;line-height:1.1;font-variant-numeric:tabular-nums}
+.page-data .arrow{color:var(--accent2)}
+.page-stat-label{font-size:11px;letter-spacing:.15em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+
+/* 时间线 */
+.tl{position:relative;margin:14px 0;padding-left:22px}
+.tl::before{content:"";position:absolute;left:5px;top:5px;bottom:5px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding:0 0 16px 16px}
+.tl-item::before{content:"";position:absolute;left:-21px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--accent)}
+.tl-item.hot::before{background:var(--accent);box-shadow:0 0 10px rgba(232,184,75,.7)}
+.tl-year{color:var(--accent);font-weight:750;font-size:14.5px}
+.tl-item p{font-size:13px;color:#c6ccd8;margin-top:3px;line-height:1.6}
+.tl-item .delta{color:var(--accent2);font-weight:650}
+
+/* 公式 */
+.formula{background:rgba(127,212,193,.05);border-left:3px solid var(--accent);padding:16px 18px;border-radius:0 10px 10px 0;margin:14px 0;text-align:center}
+.formula .f{font-size:clamp(15px,2.2vw,20px);color:#fff;font-family:"Times New Roman",Georgia,serif;letter-spacing:.03em;white-space:nowrap;line-height:1.9}
+.formula sup{font-size:.62em}
+.formula .note{color:var(--dim);font-size:12.5px;margin-top:6px}
+
+/* 交互 */
+.interact{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+.interact h3{color:var(--accent);margin-bottom:4px;font-size:16px}
+.interact .hint{color:var(--dim);font-size:12.5px;margin-bottom:10px;line-height:1.7}
+canvas{display:block;margin:8px auto;max-width:100%;background:var(--book-bg);border-radius:10px;border:1px solid var(--line)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+input[type=number],input[type=range]{background:var(--book-bg);border:1px solid var(--line);color:#fff;border-radius:8px;padding:8px 10px;font-size:14px}
+input[type=number]{width:110px}
+button{background:var(--accent);color:#1a1405;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:650;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.result{font-size:13.5px;margin-top:8px;min-height:20px;color:#c6ccd8}
+.result .ok{color:var(--green);font-weight:650}
+.result .no{color:var(--red);font-weight:650}
+.steps{font-size:12px;color:var(--dim);font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:6px;max-height:90px;overflow-y:auto;line-height:1.6}
+.game-btn{margin-right:6px}
+
+/* 导航 */
+.nav-btn{position:fixed;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);font-size:20px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;transition:all .3s;-webkit-tap-highlight-color:transparent}
+.nav-btn:hover{background:rgba(255,255,255,.12)}
+.nav-btn:active{transform:translateY(-50%) scale(.92)}
+#navLeft{left:14px}
+#navRight{right:14px}
+
+/* 进度 */
+.indicator{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
+.indicator span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .4s}
+.indicator span.on{background:var(--accent);transform:scale(1.3)}
+
+@media (max-width:640px){
+  .book-stage{width:96vw;height:76vh}
+  .nav-btn{width:40px;height:40px;font-size:15px}
+  .page{padding:20px 16px}
+  .interact{padding:12px}
+}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="book-stage">
+  <div class="book" id="book">
+    <div class="book-shadow"></div>
+    <div id="pages"></div>
+  </div>
+</div>
+<button class="nav-btn" id="navLeft" aria-label="上一页">‹</button>
+<button class="nav-btn" id="navRight" aria-label="下一页">›</button>
+<div class="indicator" id="indicator"></div>
+
+<script>
+/* ═══════════ 页面数据 ═══════════ */
+const PAGES = [
+  {
+    type:'cover',
+    kicker:'数学的珠穆朗玛',
+    title:'黎曼猜想：<span class="accent">167 年没人登顶</span>的山',
+    subtitle:'从「素数藏在哪」开始<br/>一路走到 2026 年 AI 的闯入<br/>给牧之的探险地图'
+  },
+  {
+    type:'content',
+    kicker:'第一幕 · 开场谜题',
+    title:'素数看起来乱糟糟的，<span class="q">但它们真的乱吗？</span>',
+    body:'<p>2、3、5、7、11、13、17、19、23……素数（质数）是只能被 1 和自己整除的数。把它们写成一排，你找不到任何规律。</p><p>欧几里得在公元前 300 年证明了素数<strong>无穷多</strong>。但「有多少」解决了，「<strong>藏在哪</strong>」却没人答得上来。</p>',
+    data:'∞',
+    label:'素数有无穷多个 · 欧几里得 · 公元前 300 年',
+    quote:'1792 年，15 岁的高斯在算数表背面写下：小于 x 的素数大约有 x / ln(x) 个。一个少年用数据猜中了后来的<strong>素数定理</strong>。<span class="hook">规律存在。但为什么？</span>'
+  },
+  {
+    type:'content',
+    kicker:'第二幕 · 数学的原子',
+    title:'为什么素数这么重要？<span class="q">因为它们是数学的原子</span>',
+    body:'<p>任何正整数都能拆成素数的乘积，而且<strong>拆法唯一</strong>：60 = 2×2×3×5。这个「唯一分解定理」让素数成为整数的原子。</p><p>下面这个螺旋藏着诡异的结构。1963 年乌拉姆在会议上随手画它，发现素数<strong>沿对角线扎堆</strong>。拖动滑块看更大的螺旋。</p>',
+    html:'<div class="interact" id="spiral"><h3>🧬 乌拉姆素数螺旋</h3><p class="hint">把正整数按螺旋排开，素数点成金色。看似随机的素数，藏着斜向的规律。</p><div class="controls"><span style="color:var(--dim);font-size:13px">边长</span><input type="range" id="spiralSize" min="10" max="150" step="2" value="80"><span id="spiralLabel" style="color:var(--dim);font-size:13px;min-width:54px">80 × 80</span></div><canvas id="spiralCanvas" width="380" height="380"></canvas><div class="result" id="spiralResult"></div></div>'
+  },
+  {
+    type:'content',
+    kicker:'第三幕 · 编码器',
+    title:'怎么把「看不见的素数」装进一个函数？<span class="q">欧拉找到了开关</span>',
+    body:'<p>1737 年，欧拉写下一个让整个数论改道的公式。它把「所有整数」和「所有素数」用一条等式连起来。</p>',
+    html:'<div class="formula"><div class="f">ζ(s) = 1 + 1/2<sup>s</sup> + 1/3<sup>s</sup> + 1/4<sup>s</sup> + …</div><div class="f" style="margin-top:5px">= Π (1 − p<sup>−s</sup>)<sup>−1</sup></div><div class="note">上：对所有整数求和　下：对所有素数求积（p 遍历所有素数）</div></div>',
+    quote:'为什么能相等？因为每个整数都能唯一拆成素数乘积，于是「所有整数的和」展开后，正好等于「所有素数」一项项乘起来。这台<strong>编码器</strong>把素数的全部信息压缩进了 ζ 函数。<span class="hook">100 多年后，一个德国人意识到：只要你敢把它延伸到复数世界。</span>'
+  },
+  {
+    type:'content',
+    kicker:'第四幕 · 黎曼的赌注',
+    title:'1859：一篇 9 页的论文，赌上整个数论<span class="q">伯恩哈德·黎曼，时年 32 岁</span>',
+    body:'<p>1859 年，黎曼为了申请柏林科学院院士，随手写了一篇短文《论小于给定值的素数个数》。他证明了素数定理的关键一步，然后抛出了一个自己也无法证明的猜想。</p>',
+    quote:'「ζ 函数的所有非平凡零点，都落在复平面上 Re(s) = 1/2 这条竖直线上。」<div class="src">黎曼 1859 年论文中的猜想（原话为德文，此处为转述）</div>',
+    html:'<p class="page-body" style="font-size:clamp(13px,1.6vw,15.5px)">零点是什么？ζ 函数在某些点上取值为 0。有些零点很「平凡」（在负偶数 −2、−4、−6……上），剩下的是「非平凡零点」。黎曼的赌注是：<strong>所有非平凡零点都恰好排在 Re(s) = ½ 这条线上</strong>。他算过前几个零点，全在线上；他赌全部都在。</p><p class="page-body hook" style="font-size:clamp(13px,1.6vw,15.5px)">这个赌注至今 167 年，没人能证明，也没人能推翻。为什么它这么重要？</p>'
+  },
+  {
+    type:'content',
+    kicker:'第五幕 · 零点 = 素数地震仪',
+    title:'为什么零点能「泄露」素数的位置？<span class="q">因为它们是同一条琴弦的两种声音</span>',
+    body:'<p>1896 年素数定理被证明，但「大约」到底差多少？数学家发现误差项的波动形状，完全由 ζ 函数的零点决定：每个零点贡献一个波纹，所有频率叠加起来，拼出素数分布的完整图景。</p><p>如果所有零点都在线上，误差被压到最小，无数定理直接成立；只要有一个偏了，很多证明将崩塌。</p>',
+    html:'<div class="interact" id="zeros"><h3>🎻 零点琴弦</h3><p class="hint">青色竖线是临界线 Re(s) = ½。金色点是前 30 个非平凡零点的虚部位置（数学家已把零点算到 10 万亿个以上，全部在线上）。</p><div class="controls"><span style="color:var(--dim);font-size:13px">零点个数</span><input type="range" id="zeroCount" min="5" max="150" step="5" value="30"><span id="zeroLabel" style="color:var(--dim);font-size:13px;min-width:56px">30 个</span></div><canvas id="zeroCanvas" width="560" height="240"></canvas><div class="result" id="zeroResult"></div></div>'
+  },
+  {
+    type:'content',
+    kicker:'第六幕 · 百年攀登',
+    title:'爬不上去，就先量量山有多高<span class="q">猜想的「部分证明」之路</span>',
+    body:'<p>证明不了「所有零点都在线上」，数学家换了个问题：<strong>至少有多大比例的零点在线上？</strong></p>',
+    html:'<div class="tl"><div class="tl-item"><div class="tl-year">1974 · Levinson</div><p>至少 <span class="delta">1/3（约 33%）</span> 的零点在临界线上。</p></div><div class="tl-item"><div class="tl-year">1989 · Conrey</div><p>推到 <span class="delta">2/5（40%）</span>。</p></div><div class="tl-item"><div class="tl-year">2019 · Pratt, Robles, Zaharescu</div><p>推到 <span class="delta">5/12（约 41.6%）</span>。30 年只前进 1.6 个百分点。</p></div><div class="tl-item hot"><div class="tl-year">2026 · Claude（Anthropic 研究版）</div><p>一举推到 <span class="delta">67.2%</span>。150 年来最大跳跃。</p></div></div><div class="page-data">41.6% <span class="arrow">→</span> 67.2%<div class="page-stat-label">临界线上零点比例的下界 · 2019 人类纪录 → 2026 Claude</div></div>',
+    quote:'证明「至少 67.2% 在线上」≠ 证明「100% 在线上」。它像是测出珠峰至少 8000 米高，了不起，但离登顶还差着最关键的一步。'
+  },
+  {
+    type:'content',
+    kicker:'第七幕 · AI 的闯入',
+    title:'Claude 是怎么做到的？<span class="q">650 次失败之后</span>',
+    body:'<p>2026 年 8 月，Anthropic 给 Claude（一个未公开的研究版本）下了一个「不合理」的任务：<strong>认真攻一下黎曼猜想本尊</strong>。</p>',
+    quote:'"it didn\'t succeed"<div class="src">Anthropic 官方博客《Learning more about Claude\'s mathematical capabilities》2026-08-10。第一句话就承认：猜想本身没解决。</div>',
+    html:'<p class="page-body" style="font-size:clamp(13px,1.6vw,15.5px)">但在「攻顶失败」的过程中，Claude 意外做出了突破。过程：第一轮 <strong>650 个想法全部失败</strong>，提示它的人只说了一句「keep going / believe in yourself」；第二轮 Claude 协调 <strong>60 个子代理</strong>跑了一天半：31M 输出 token、2,400 条 shell 命令、数百 Python 脚本，子代理互审、做数千次数值检验、下载 54 篇 arXiv 论文确认没撞车，还产出了 Lean 形式化证明。Anthropic 请来 Conrey 与 Goldston 两位权威审阅。</p>'
+  },
+  {
+    type:'content',
+    kicker:'第八幕 · 诚实的一课',
+    title:'那这到底算成功还是失败？<span class="q">都不是。它是「失败的价值」</span>',
+    body:'<p><strong>✅ 了不起的部分</strong>：150 年人类只推到 41.6%，AI 一次跳到 67.2%，还完成了完整科研闭环：想法 → 子代理互审 → 数值检验 → 文献查重 → 形式化验证 → 请人类专家复核。</p><p><strong>⚠️ 没做到的部分</strong>：黎曼猜想本身纹丝未动。Anthropic 自己都说：别指望这条路通向登顶。</p>',
+    quote:'给牧之的话：650 次失败不是 650 次失败，只要每一次失败的原因都不一样，你就是在搜索空间里前进。真正该停下来的时刻，是你发现自己<strong>在重复撞同一堵墙</strong>。<div class="src">源自 2026-08-10 Anthropic 事件的方法论提炼</div>',
+    html:'<p class="page-body" style="font-size:clamp(13px,1.6vw,15.5px)">Claude 一开始也怀疑自己，它从训练数据里学到了「开放问题很难、AI 做不到」，被两句鼓励话推了一把才继续走下去。<span class="hook">珠穆朗玛还在那里。但这一次，登山队里多了一种全新的登山者。</span></p>'
+  },
+  {
+    type:'content',
+    kicker:'动手验证 · 素数实验室',
+    title:'自己当一次黎曼<span class="q">猜猜它是不是素数</span>',
+    body:'<p>黎曼靠计算和直觉赌零点。你也来赌一把：输入一个数，猜它是不是素数，再看试除过程揭晓。</p>',
+    html:'<div class="interact" id="game"><h3>🔍 素数侦探</h3><p class="hint">输入 2 到 5000 之间的数，先猜，再点「验证」看试除动画。</p><div class="controls"><input type="number" id="gameInput" min="2" max="5000" value="97"><button id="gameBtn">验证</button><span id="gameGuess" style="color:var(--dim);font-size:13px">你先猜猜看？</span></div><div class="result" id="gameResult"></div><div class="steps" id="gameSteps"></div></div>'
+  },
+  {
+    type:'content',
+    kicker:'来源与核实',
+    title:'事实来源与核实状态',
+    body:'<ul style="font-size:clamp(12px,1.5vw,14px);line-height:2;color:#c6ccd8;list-style:none;padding:0">',
+    html:'<div class="page-body" style="font-size:clamp(11.5px,1.4vw,13.5px);line-height:2"><p>🟢 Anthropic 官方博客《Learning more about Claude\'s mathematical capabilities》（2026-08-10，anthropic.com/research/riemann-zeta）：67.2%、650 想法、60 子代理、31M tokens、54 篇 arXiv、Lean 形式化证明、Conrey/Goldston 审阅、"didn\'t succeed"</p><p>🟢 数学史下界链：Levinson 1974（≥1/3）为教科书标准事实；Conrey 1989（≥2/5）与 Pratt-Robles-Zaharescu 2019（≥5/12）经 Crossref 论文元数据核实（DOI: 10.1515/crll.1989.399.1 / 10.1007/s40687-019-0199-8）</p><p>🟢 欧拉乘积公式、唯一分解定理、素数定理：标准数学事实</p><p>🟡 黎曼 1859 猜想原文为德文转述（未逐字核对），已标注「转述」</p><p>🟢 零点虚部位置为公开数值（已验证至 10 万亿个零点以上）</p><p style="color:var(--accent);margin-top:12px">给牧之的探险地图 · 2026-08-11 · 与 Claude 一起读数学</p></div>'
+  }
+];
+
+/* ═══════════ 翻页书引擎 ═══════════ */
+let cur = 0, flip = false;
+const N = PAGES.length;
+const book = document.getElementById('book');
+const ind = document.getElementById('indicator');
+
+function rC(){
+  const pages = document.querySelectorAll('.page');
+  pages.forEach((p,i)=>p.classList.toggle('on', i===cur));
+  document.querySelectorAll('.indicator span').forEach((s,i)=>s.classList.toggle('on', i===cur));
+  if(cur===2)drawSpiral(+document.getElementById('spiralSize').value);
+  if(cur===5)drawZeros(+document.getElementById('zeroCount').value);
+}
+function hA(){document.querySelectorAll('.page').forEach(p=>{p.style.opacity=0;});}
+function sP(i,z,cls){const p=document.getElementById('page-'+i);if(!p)return;p.style.opacity=1;p.style.zIndex=z;p.classList.add(cls);}
+function doFlip(dst,dir){
+  if(flip||dst<0||dst>=N)return;
+  const t=dst>cur?cur:dst;
+  flip=true;hA();
+  sP(dst,1,'page-underneath');
+  if(dir<0)sP(cur,2,'page-current');
+  const sh=document.createElement('div');sh.className='curl-shadow';
+  if(dir>0)sh.style.cssText='background:linear-gradient(to right,rgba(0,0,0,.6) 0%,transparent 30%)';
+  else sh.style.cssText='background:linear-gradient(to left,rgba(0,0,0,.6) 0%,transparent 30%)';
+  book.appendChild(sh);
+  const fl=document.createElement('div');fl.className='page-flipper';
+  if(dir<0)fl.style.transform='perspective(2200px) rotateY(-180deg)';
+  const fr=document.createElement('div');fr.className='page-flipper';
+  fr.style.cssText='left:50%;transform-origin:right center;z-index:3';
+  fr.style.transform='perspective(2200px) rotateY(0deg)';
+  book.appendChild(fl);book.appendChild(fr);
+  setTimeout(()=>{fl.style.transform='perspective(2200px) rotateY(-180deg)';fr.style.transform='perspective(2200px) rotateY(180deg)';},30);
+  const done=()=>{[sh,fl,fr].forEach(el=>el.remove());flip=false;cur=dst;rC();};
+  fl.addEventListener('transitionend',function h(){fl.removeEventListener('transitionend',h);done()});
+  setTimeout(done,1200);
+}
+function next(){doFlip(cur+1,1)}
+function prev(){doFlip(cur-1,-1)}
+
+PAGES.forEach((pg,i)=>{
+  const el=document.createElement('div');
+  el.className='page'+(pg.type==='cover'?' pg-cover':'');
+  el.id='page-'+i;
+  let html='';
+  if(pg.type==='cover'){
+    if(pg.kicker)html+='<div class="cover-kicker">'+pg.kicker+'</div>';
+    html+='<div class="cover-title">'+pg.title+'</div>';
+    html+='<div class="cover-divider"></div>';
+    if(pg.subtitle)html+='<div class="cover-subtitle">'+pg.subtitle+'</div>';
+  }else{
+    if(pg.kicker)html+='<div class="page-kicker">'+pg.kicker+'</div>';
+    html+='<div class="page-title">'+pg.title+'</div>';
+    if(pg.data)html+='<div class="page-data">'+pg.data+'</div><div class="page-stat-label">'+(pg.label||'')+'</div>';
+    if(pg.body)html+='<div class="page-body">'+pg.body+'</div>';
+    if(pg.html)html+=pg.html;
+    if(pg.quote)html+='<div class="page-quote">'+pg.quote+'</div>';
+  }
+  el.innerHTML=html;
+  document.getElementById('pages').appendChild(el);
+  const dot=document.createElement('span');
+  ind.appendChild(dot);
+});
+rC();
+
+document.getElementById('navRight').addEventListener('click',next);
+document.getElementById('navLeft').addEventListener('click',prev);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next()}
+  if(e.key==='ArrowLeft'){e.preventDefault();prev()}
+});
+let tx=0,sw=false;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;sw=true},{passive:true});
+document.addEventListener('touchmove',e=>{if(sw)e.preventDefault()},{passive:false});
+document.addEventListener('touchend',e=>{
+  if(!sw)return;sw=false;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50){dx<0?next():prev()}
+},{passive:true});
+
+/* ═══════════ 星空 ═══════════ */
+(function(){
+  const s=document.getElementById('stars'),n=70;
+  for(let i=0;i<n;i++){
+    const d=document.createElement('i');
+    d.style.left=Math.random()*100+'%';
+    d.style.top=Math.random()*100+'%';
+    d.style.animationDelay=(Math.random()*4)+'s';
+    const sz=Math.random()*2+1;
+    d.style.width=sz+'px';d.style.height=sz+'px';
+    s.appendChild(d);
+  }
+})();
+
+/* ═══════════ 工具 ═══════════ */
+function isPrime(n){
+  if(n<2)return false;
+  if(n%2===0)return n===2;
+  for(let i=3;i*i<=n;i+=2)if(n%i===0)return false;
+  return true;
+}
+function sieve(n){
+  const a=new Uint8Array(n+1).fill(1);a[0]=a[1]=0;
+  for(let i=2;i*i<=n;i++)if(a[i])for(let j=i*i;j<=n;j+=i)a[j]=0;
+  return a;
+}
+
+/* ═══════════ 乌拉姆螺旋 ═══════════ */
+const spiralCanvas=document.getElementById('spiralCanvas');
+const spiralCtx=spiralCanvas.getContext('2d');
+function drawSpiral(n){
+  const canvas=spiralCanvas;
+  const dpr=window.devicePixelRatio||1;
+  const size=Math.min(canvas.parentElement.clientWidth-8,380);
+  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  canvas.width=size*dpr;canvas.height=size*dpr;
+  const ctx=spiralCtx;ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#05070f';ctx.fillRect(0,0,size,size);
+  const cell=size/n;
+  const primes=sieve(n*n);
+  let x=Math.floor(n/2),y=Math.floor(n/2),dir=0,step=1,turn=0,drawn=0;
+  const dx=[1,0,-1,0],dy=[0,1,0,-1];
+  for(let v=1;v<=n*n;v++){
+    const px=x*cell,py=y*cell;
+    ctx.fillStyle=primes[v]?'#e8b84b':'#1e2a44';
+    ctx.globalAlpha=primes[v]?0.95:0.35;
+    ctx.fillRect(px,py,cell+0.5,cell+0.5);
+    if(primes[v])drawn++;
+    x+=dx[dir];y+=dy[dir];turn++;
+    if(turn===step){dir=(dir+1)%4;turn=0;if(dir%2===0)step++;}
+  }
+  ctx.globalAlpha=1;
+  document.getElementById('spiralResult').innerHTML='边长 '+n+' 里有 <span class="ok">'+drawn+' 个素数</span>（占比 '+(100*drawn/(n*n)).toFixed(1)+'%）。看对角线上的金色聚集。';
+}
+document.getElementById('spiralSize').addEventListener('input',function(){
+  const v=+this.value;
+  document.getElementById('spiralLabel').textContent=v+' × '+v;
+  drawSpiral(v);
+});
+
+/* ═══════════ 零点琴弦 ═══════════ */
+const zeroCanvas=document.getElementById('zeroCanvas');
+const zeroCtx=zeroCanvas.getContext('2d');
+const zt=[14.1347,21.0220,25.0109,30.4249,32.9351,37.5862,40.9187,43.3271,48.0052,49.7738,52.9703,56.4462,59.3470,60.8318,65.1125,67.0798,69.5464,72.0672,75.7047,77.1448,79.3374,82.9104,84.7355,87.4253,88.8091,92.4919,94.6513,95.8706,98.8312,101.3179,103.7255,105.4466,107.1686,111.0295,111.8747,114.3202,116.2267,118.7908,121.3701,122.9468,124.2568,127.5167,129.5787,131.0877,133.4977,134.7565,138.1160,139.7361,141.1237,143.1118,146.0009,147.4228,149.4109,150.0565,153.1298,155.9828,157.9681,159.1300,161.1889,163.0307,165.5371,167.1844,169.0945,169.9116,173.4115,174.7542,176.4414,178.3774,179.9165,182.2071,184.8745,185.5988,187.2289,189.4162,192.0267,193.0797,195.2654,196.8765,198.1854,201.2644,203.2479,205.3940,207.9062,209.3095,211.3450,213.4116,214.7913,216.8643,218.0437,220.0087,221.4460,224.0070,225.4916,227.1640,228.4420,230.1656,231.9525,233.7904,235.8973,237.7686,239.2468,241.2187,242.3055,244.3156,246.4087,247.8308,249.7734,251.5187,253.3514,254.8099,256.5114,258.4661,260.2918,261.5191,263.3607,265.0010,266.8010,268.4636,269.8745,271.5456,273.3923,274.9009,276.5811,278.1976,279.5478,281.1774,282.6723,284.5722,286.0676,287.6467,289.1384,290.9010,292.4443,294.0365,295.5670,297.2932,298.7825,300.4502,302.0315,303.5576,305.1302,306.8197,308.4013,309.8888,311.5766,313.1310,314.7446,316.2716,317.9022,319.4905,321.0796,322.6216,324.1800,325.7893,327.3980,328.9783,330.5426,332.1184,333.7380,335.3162,336.9634,338.5272,340.1117,341.7280,343.3408,344.9498,346.5151,348.1217,349.7552,351.3369,352.9348,354.5530,356.1729,357.7793,359.3990,360.9993,362.6095,364.2369,365.8502,367.4720,369.0532,370.6877,372.3063,373.9006,375.5155,377.1560,378.7581,380.3842,381.9976,383.5936,385.2473,386.8447,388.4732,390.0941,391.6996,393.3224,394.9617,396.5725,398.1931,399.8084,401.4142,403.0568,404.6884,406.2995,407.9107,409.5305,411.1749,412.7831,414.4061,416.0280,417.6406,419.2753,420.8668,422.5002,424.1041,425.7508,427.3358,428.9785,430.5845,432.2087,433.8411,435.4440,437.0864,438.7069,440.3288,441.9389,443.5798,445.1982,446.8097,448.4458,450.0748,451.6866,453.3051,454.9402,456.5517,458.1757,459.7965,461.4238,463.0417,464.6650,466.2924,467.9016,469.5428,471.1596,472.7831,474.4143,476.0220,477.6596,479.2684,480.9001,482.5156,484.1390,485.7595,487.3910,488.9975,490.6301,492.2457,493.8664,495.5076,497.1129,498.7467,500.3505,501.9874,503.6007,505.2184,506.8425,508.4665,510.0706,511.6931,513.3292,514.9327,516.5685,518.1770,519.8063,521.4211,523.0504,524.6570,526.2944,527.9088,529.5421,531.1467,532.7825,534.3931,536.0267,537.6438,539.2768,540.8820,542.5164,544.1320,545.7644,547.3708,549.0098,550.6166,552.2548,553.8620,555.5014,557.1111,558.7463,560.3549,561.9913,563.6031,565.2388,566.8492,568.4868,570.1007,571.7388,573.3546,574.9916,576.6053,578.2425,579.8585,581.4949,583.1091,584.7455,586.3631,587.9959,589.6152,591.2498,592.8690,594.5024,596.1218,597.7555,599.3774,601.0100,602.6300,604.2616,605.8822,607.5138,609.1324,610.7646,612.3848,614.0168,615.6366,617.2680,618.8887,620.5198,622.1397,623.7715,625.3915,627.0232,628.6428,630.2745,631.8945,633.5258,635.1454,636.7774,638.3977,640.0296,641.6491,643.2805,644.9001,646.5315,648.1510,649.7818,651.4013,653.0324,654.6518,656.2827,657.9021,659.5328,661.1520,662.7826,664.4018,666.0321,667.6516,669.2819,670.9010,672.5313,674.1503,675.7807,677.3996,679.0297,680.6488,682.2789,683.8978,685.5177,687.1477,688.7665,690.3964,692.0152,693.6450,695.2637,696.8935,698.5121,700.1418,701.7604,703.3900,705.0085,706.6381,708.2565,709.8859,711.5043,713.1337,714.7520,716.3813,717.9996,719.6288,721.2471,722.8763,724.4944,726.1236,727.7417,729.3708,730.9889,732.6180,734.2359,735.8650,737.4830,739.1120,740.7298,742.3588,743.9766,745.6055,747.2233,748.8521,750.4698,752.0986,753.7163,755.3450,756.9626,758.5913,760.2088,761.8375,763.4549,765.0835,766.7009,768.3294,769.9467,771.5752,773.1924,774.8209,776.4380,778.0664,779.6835,781.3119,782.9289,784.5572,786.1742,787.8025,789.4194,791.0476,792.6645,794.2927,795.9095,797.5377,799.1544,800.7825,802.3992,804.0273,805.6440,807.2720,808.8886,810.5166,812.1331,813.7611,815.3775,817.0055,818.6219,820.2498,821.8661,823.4940,825.1103,826.7382,828.3544,829.9823,831.5984,833.2262,834.8423,836.4701,838.0861,839.7139,841.3299,842.9576,844.5736,846.2013,847.8172,849.4449,851.0608,852.6884,854.3043,855.9319,857.5478,859.1754,860.7912,862.4188,864.0346,865.6622,867.2779,868.9055,870.5212,872.1487,873.7644,875.3919,877.0076,878.6350,880.2507,881.8781,883.4938,885.1212,886.7368,888.3642,889.9798,891.6071,893.2227,894.8500,896.4656,898.0929,899.7084,901.3357,902.9512,904.5785,906.1940,907.8212,909.4367,911.0639,912.6794,914.3066,915.9220,917.5492,919.1646,920.7918,922.4071,924.0343,925.6496,927.2768,928.8921,930.5192,932.1345,933.7616,935.3769,936.9920,938.6192,940.2463,941.8615,943.4886,945.1038,946.7308,948.3460,949.9730,951.5882,953.2152,954.8304,956.4574,958.0725,959.6995,961.3146,962.9416,964.5567,966.1837,967.7987,969.4257,971.0407,972.6677,974.2827,975.9096,977.5246,979.1515,980.7665,982.3934,984.0083,985.6352,987.2501,988.8770,990.4919,992.1188,993.7337,995.3606,996.9754,998.6023,1000.2171];
+function drawZeros(count){
+  const canvas=zeroCanvas;
+  const dpr=window.devicePixelRatio||1;
+  const w=Math.min(canvas.parentElement.clientWidth-8,560);
+  const h=Math.max(200,w*0.42);
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  canvas.width=w*dpr;canvas.height=h*dpr;
+  const ctx=zeroCtx;ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#05070f';ctx.fillRect(0,0,w,h);
+  const lineX=w*0.16;
+  ctx.strokeStyle='#7fd4c1';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(lineX,16);ctx.lineTo(lineX,h-26);ctx.stroke();
+  ctx.fillStyle='#7fd4c1';ctx.font='12px sans-serif';ctx.textAlign='center';
+  ctx.fillText('Re(s) = ½',lineX,h-10);
+  const tMax=Math.max(zt[count-1]||100,50);
+  const scale=(w-lineX-30)/tMax;
+  ctx.fillStyle='#e8b84b';
+  for(let i=0;i<count;i++){
+    const x=lineX+zt[i]*scale;
+    ctx.beginPath();ctx.arc(x,h*0.55,4,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle='#8b97ad';ctx.font='11px sans-serif';ctx.textAlign='left';
+  ctx.fillText('每个金点 = 一个零点',lineX+8,24);
+  document.getElementById('zeroResult').innerHTML='已显示前 <span class="ok">'+count+'</span> 个零点（t 从 '+zt[0].toFixed(1)+' 到 '+zt[count-1].toFixed(1)+'）。全部落在青色临界线上，这正是黎曼赌的内容。';
+}
+document.getElementById('zeroCount').addEventListener('input',function(){
+  const v=+this.value;
+  document.getElementById('zeroLabel').textContent=v+' 个';
+  drawZeros(v);
+});
+
+/* ═══════════ 素数侦探游戏 ═══════════ */
+const gameBtn=document.getElementById('gameBtn');
+const gameInput=document.getElementById('gameInput');
+const gameGuess=document.getElementById('gameGuess');
+const gameResult=document.getElementById('gameResult');
+const gameSteps=document.getElementById('gameSteps');
+let guessed=false;
+gameGuess.addEventListener('click',()=>{
+  const n=+gameInput.value;
+  if(!n||n<2||n>5000){gameGuess.textContent='输入 2-5000 的数';return;}
+  gameGuess.textContent=isPrime(n)?'我赌它是素数 💪':'我赌它不是素数 🤔';
+  guessed=true;
+});
+gameBtn.addEventListener('click',()=>{
+  const n=+gameInput.value;
+  if(!n||n<2||n>5000){gameResult.innerHTML='<span class="no">请输入 2 到 5000 之间的数</span>';return;}
+  gameBtn.disabled=true;
+  gameResult.innerHTML='';
+  gameSteps.textContent='';
+  let i=2;
+  const step=()=>{
+    if(i*i>n){
+      gameResult.innerHTML='<span class="ok">✅ '+n+' 是素数！</span>'+(guessed?'（你猜对了吗？）':'');
+      gameSteps.textContent='试除了 2 到 √'+n+' 的所有整数，没有一个能整除 '+n+'。';
+      gameBtn.disabled=false;return;
+    }
+    if(n%i===0){
+      gameResult.innerHTML='<span class="no">❌ '+n+' 不是素数：'+i+' × '+(n/i)+' = '+n+'</span>'+(guessed?'（你猜对了吗？）':'');
+      gameSteps.textContent='试除到 '+i+' 时命中：'+n+' 能被 '+i+' 整除。';
+      gameBtn.disabled=false;return;
+    }
+    if(i===2){gameSteps.textContent='试除 2：'+n+' % 2 = '+n%2+'，不整除';}
+    else{gameSteps.textContent+='\n试除 '+i+'：'+n+' % '+i+' = '+n%i+'，不整除';}
+    i=(i===2)?3:i+2;
+    setTimeout(step,180);
+  };
+  step();
+});
+</script>
+</body>
+</html>
